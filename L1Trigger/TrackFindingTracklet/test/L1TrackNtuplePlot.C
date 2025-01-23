@@ -823,7 +823,7 @@ void L1TrackNtuplePlot(TString type,
   for (int seed = 0; seed < seedNum; seed++) {
     h_res_pt_seed[seed] = new TH1F(Form("res_pt_seed_%d", seed),
                                    ";p_{T} residual (L1 - sim) [GeV]; L1 tracks / 0.05",
-                                   200, -5.0, 5.0);
+                                   40, -1.0, 1.0);
   }
 
 
@@ -3368,14 +3368,41 @@ void L1TrackNtuplePlot(TString type,
     mySmallText(0.22, 0.82, 1, ctxt);
     c.SaveAs(DIR + type + "_res_pt.pdf");
 
+/*
+    // Create a canvas
+    TCanvas *canvas = new TCanvas("canvas", "All Plots on One Canvas", 800, 600);
+
+    // Create a legend
+    TLegend *legend = new TLegend(0.7, 0.7, 0.9, 0.9); // Adjust the position as needed
+
+    // Loop over seeds and draw histograms on the same canvas
     for (int seed = 0; seed < seedNum; seed++) {
-    h_res_pt_seed[seed]->Draw();
-    rms = h_res_pt_seed[seed]->GetRMS();
-    sprintf(ctxt, "RMS = %.4f", rms);
-    mySmallText(0.22, 0.82, 1, ctxt);
-      c.SaveAs(Form("%s%s_res_pt_seed%d.pdf", DIR.Data(), type.Data(), seed));
+      if (seed == 0) {
+        // Draw the first histogram without "SAME"
+        h_res_pt_seed[seed]->SetLineColor(seed + 1); // Assign different colors
+        h_res_pt_seed[seed]->Draw();
+      } else {
+        // Draw subsequent histograms with "SAME"
+        h_res_pt_seed[seed]->SetLineColor(seed + 1); // Assign different colors
+        h_res_pt_seed[seed]->Draw("SAME");
+      }
+
+      // Add an entry to the legend
+      legend->AddEntry(h_res_pt_seed[seed], Form("Seed %d", seed), "l");
+
+
+      double rms = h_res_pt_seed[seed]->GetRMS();
+      char ctxt[100];
+      sprintf(ctxt, "RMS = %.4f", rms);
+      mySmallText(0.22, 0.82 - seed * 0.05, 1, ctxt); // Adjust position dynamically
     }
 
+    // Draw the legend
+    legend->Draw();
+
+    // Save the canvas as a single file
+    canvas->SaveAs(Form("%s%s_res_pt_all_seeds.pdf", DIR.Data(), type.Data()));
+*/
 
     h_res_ptRel->Draw();
     rms = h_res_ptRel->GetRMS();
