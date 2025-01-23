@@ -42,7 +42,7 @@ void makeResidualIntervalPlot(
 // ----------------------------------------------------------------------------------------------------------------
 // Main script
 // ----------------------------------------------------------------------------------------------------------------
-
+const int seedNum = 12;
 void L1TrackNtuplePlot(TString type,
                        TString type_dir = "",
                        TString treeName = "",
@@ -51,12 +51,12 @@ void L1TrackNtuplePlot(TString type,
                        int TP_select_eventid = 0,
                        bool useTightCuts = false,
                        bool useDeadRegion = false,
-                       float TP_minPt = 2.0,
+                       float TP_minPt = 3.0,
                        float TP_maxPt = 100.0,
-                       float TP_maxEta = 2.4,
-                       float TP_maxLxy = 1.0,
-                       float TP_maxD0 = 1.0,
-                       bool doDetailedPlots = false) {
+                       float TP_maxEta = 2.0,
+                       float TP_maxDxy = 10.0,
+                       float TP_maxD0 = 10.0,
+                       bool doDetailedPlots = true) {
   // type:              this is the name of the input file you want to process (minus ".root" extension)
   // type_dir:          this is the directory containing the input file you want to process. Note that this must end with a "/", as in "EventSets/"
   // TP_select_pdgid:   if non-zero, only select TPs with a given PDG ID
@@ -68,7 +68,7 @@ void L1TrackNtuplePlot(TString type,
 
   // TP_select_injet: only look at TPs that are within a jet with pt > 30 GeV (==1) or within a jet with pt > 100 GeV (==2), >200 GeV (==3) or all TPs (==0)
 
-  //--  N.B. For standard displaced tracking plots, set TP_minPt=3.0, TP_maxEta=2.0, TP_maxLxy=10.0,
+  //--  N.B. For standard displaced tracking plots, set TP_minPt=3.0, TP_maxEta=2.0, TP_maxDxy=10.0,
   //--  TO_maxD0=10.0, doDetailedPlots=true. (Efficiency plots vs eta also usually made for d0 < 5).
 
   gROOT->SetBatch();
@@ -148,7 +148,7 @@ void L1TrackNtuplePlot(TString type,
   vector<float>* tp_pt;
   vector<float>* tp_eta;
   vector<float>* tp_phi;
-  vector<float>* tp_lxy;
+  vector<float>* tp_dxy;
   vector<float>* tp_z0;
   vector<float>* tp_d0;
   vector<int>* tp_pdgid;
@@ -206,7 +206,7 @@ void L1TrackNtuplePlot(TString type,
   TBranch* b_tp_pt;
   TBranch* b_tp_eta;
   TBranch* b_tp_phi;
-  TBranch* b_tp_lxy;
+  TBranch* b_tp_dxy;
   TBranch* b_tp_z0;
   TBranch* b_tp_d0;
   TBranch* b_tp_pdgid;
@@ -262,7 +262,7 @@ void L1TrackNtuplePlot(TString type,
   tp_pt = 0;
   tp_eta = 0;
   tp_phi = 0;
-  tp_lxy = 0;
+  tp_dxy = 0;
   tp_z0 = 0;
   tp_d0 = 0;
   tp_pdgid = 0;
@@ -318,7 +318,7 @@ void L1TrackNtuplePlot(TString type,
   tree->SetBranchAddress("tp_pt", &tp_pt, &b_tp_pt);
   tree->SetBranchAddress("tp_eta", &tp_eta, &b_tp_eta);
   tree->SetBranchAddress("tp_phi", &tp_phi, &b_tp_phi);
-  tree->SetBranchAddress("tp_lxy", &tp_lxy, &b_tp_lxy);
+  tree->SetBranchAddress("tp_dxy", &tp_dxy, &b_tp_dxy);
   tree->SetBranchAddress("tp_z0", &tp_z0, &b_tp_z0);
   tree->SetBranchAddress("tp_d0", &tp_d0, &b_tp_d0);
   tree->SetBranchAddress("tp_pdgid", &tp_pdgid, &b_tp_pdgid);
@@ -515,8 +515,16 @@ void L1TrackNtuplePlot(TString type,
                                  "7.5-8"};
 
   TH1F* h_absResVsPt_pt[nRANGE];
+  std::vector<std::vector<TH1F*>> h_absResVsPt_pt_seed(seedNum, std::vector<TH1F*>(nRANGE));
+
   TH1F* h_absResVsPt_ptRel[nRANGE];
+
+
   TH1F* h_absResVsPt_z0[nRANGE];
+  std::vector<std::vector<TH1F*>> h_absResVsPt_z0_seed(seedNum, std::vector<TH1F*>(nRANGE));
+
+
+
   TH1F* h_absResVsPt_phi[nRANGE];
   TH1F* h_absResVsPt_eta[nRANGE];
   TH1F* h_absResVsPt_d0[nRANGE];
@@ -546,6 +554,19 @@ void L1TrackNtuplePlot(TString type,
         new TH1F("absResVsPt_d0_" + ptrange[i], ";d_{0}residual (L1 - sim) [GeV]; L1 tracks / 0.1", 100, 0, 0.02);
   }
 
+
+  // Adding initialization for h_absResVsPt_z0_seed
+  for (int seed = 0; seed < seedNum; seed++) {
+    for (int i = 0; i < nRANGE; i++) {
+
+
+      h_absResVsPt_pt_seed[seed][i] = new TH1F(
+       Form("absResVsPt_pt_%d_%d", seed, i), ";p_{T} residual (L1 - sim) [GeV]; L1 tracks / 0.1", nBinsPtRes, 0, maxPtRes);
+      h_absResVsPt_z0_seed[seed][i] = new TH1F(Form("absResVsPt_z0_%d_%d", seed, i),
+                                               ";z_{0} residual (L1 - sim) [GeV]; L1 tracks / 0.1",
+                                               nBinsZ0Res, 0, maxZ0Res);
+    }
+  }
   for (int i = 0; i < nRANGE_L; i++) {
     h_absResVsPt_pt_L[i] = new TH1F(
         "absResVsPt_L_pt_" + ptrange_L[i], ";p_{T} residual (L1 - sim) [GeV]; L1 tracks / 0.1", nBinsPtRes, 0, maxPtRes);
@@ -796,11 +817,31 @@ void L1TrackNtuplePlot(TString type,
   // ----------------------------------------------------------------------------------------------------------------
   // resolution histograms
   TH1F* h_res_pt = new TH1F("res_pt", ";p_{T} residual (L1 - sim) [GeV]; L1 tracks / 0.05", 200, -5.0, 5.0);
+
+  std::vector<TH1F*> h_res_pt_seed(seedNum);
+
+  for (int seed = 0; seed < seedNum; seed++) {
+    h_res_pt_seed[seed] = new TH1F(Form("res_pt_seed_%d", seed),
+                                   ";p_{T} residual (L1 - sim) [GeV]; L1 tracks / 0.05",
+                                   200, -5.0, 5.0);
+  }
+
+
+
+
   TH1F* h_res_ptRel = new TH1F("res_ptRel", ";p_{T} residual (L1 - sim) / p_{T}; L1 tracks / 0.01", 200, -1.0, 1.0);
   TH1F* h_res_eta = new TH1F("res_eta", ";#eta residual (L1 - sim); L1 tracks / 0.0002", 100, -0.01, 0.01);
   TH1F* h_res_phi = new TH1F("res_phi", ";#phi residual (L1 - sim) [rad]; L1 tracks / 0.0001", 100, -0.005, 0.005);
 
   TH1F* h_res_z0 = new TH1F("res_z0", ";z_{0} residual (L1 - sim) [cm]; L1 tracks / 0.02", 100, -1.0, 1.0);
+
+  std::vector<TH1F*> h_res_z0_seed(seedNum);
+  for (int seed = 0; seed < seedNum; seed++) {
+    h_res_z0_seed[seed] = new TH1F(Form("res_z0_seed_%d", seed),
+                                   ";z_{0} residual (L1 - sim) [cm]; L1 tracks / / 0.02", 100, -1.0, 1.0);
+  }
+
+
   TH1F* h_res_z0_C = new TH1F("res_z0_C", ";z_{0} residual (L1 - sim) [cm]; L1 tracks / 0.02", 100, -1.0, 1.0);
   TH1F* h_res_z0_I = new TH1F("res_z0_I", ";z_{0} residual (L1 - sim) [cm]; L1 tracks / 0.02", 100, -1.0, 1.0);
   TH1F* h_res_z0_F = new TH1F("res_z0_F", ";z_{0} residual (L1 - sim) [cm]; L1 tracks / 0.02", 100, -1.0, 1.0);
@@ -844,6 +885,10 @@ void L1TrackNtuplePlot(TString type,
   // more resolution vs pt
 
   TH1F* h_resVsPt_pt[nRANGE];
+  std::vector<std::vector<TH1F*>> h_resVsPt_pt_seed(seedNum, std::vector<TH1F*>(nRANGE));
+
+
+
   TH1F* h_resVsPt_pt_C[nRANGE];
   TH1F* h_resVsPt_pt_I[nRANGE];
   TH1F* h_resVsPt_pt_F[nRANGE];
@@ -854,6 +899,8 @@ void L1TrackNtuplePlot(TString type,
   TH1F* h_resVsPt_ptRel_F[nRANGE];
 
   TH1F* h_resVsPt_z0[nRANGE];
+  std::vector<std::vector<TH1F*>> h_resVsPt_z0_seed(seedNum, std::vector<TH1F*>(nRANGE));
+
   TH1F* h_resVsPt_z0_C[nRANGE];
   TH1F* h_resVsPt_z0_I[nRANGE];
   TH1F* h_resVsPt_z0_F[nRANGE];
@@ -869,6 +916,8 @@ void L1TrackNtuplePlot(TString type,
   for (int i = 0; i < nRANGE; i++) {
     h_resVsPt_pt[i] =
         new TH1F("resVsPt_pt_" + ptrange[i], ";p_{T} residual (L1 - sim) [GeV]; L1 tracks / 0.1", 100, -5.0, 5.0);
+
+
     h_resVsPt_pt_C[i] =
         new TH1F("resVsPt_pt_C_" + ptrange[i], ";p_{T} residual (L1 - sim) [GeV]; L1 tracks / 0.1", 100, -5.0, 5.0);
     h_resVsPt_pt_I[i] =
@@ -887,6 +936,8 @@ void L1TrackNtuplePlot(TString type,
 
     h_resVsPt_z0[i] =
         new TH1F("resVsPt_z0_" + ptrange[i], ";z_{0} residual (L1 - sim) [cm]; L1 tracks / 0.02", 100, -1, 1);
+
+
     h_resVsPt_z0_C[i] =
         new TH1F("resVsPt_z0_C_" + ptrange[i], ";z_{0} residual (L1 - sim) [cm]; L1 tracks / 0.02", 100, -1, 1);
     h_resVsPt_z0_I[i] =
@@ -910,6 +961,19 @@ void L1TrackNtuplePlot(TString type,
         new TH1F("resVsPt_d0_" + ptrange[i], ";d_{0} residual (L1 - sim) [cm]; L1 tracks / 0.0004", 100, -0.02, 0.02);
   }
 
+
+  for (int seed = 0; seed < seedNum; seed++){
+
+    for (int i = 0; i < nRANGE; i++) {
+
+
+      h_resVsPt_pt_seed[seed][i] = new TH1F(
+       Form("resVsPt_pt__%d_%d", seed, i), ";p_{T} residual (L1 - sim) [GeV]; L1 tracks / 0.1", 100, -5.0, 5.0);
+      h_resVsPt_z0_seed[seed][i] = new TH1F(Form("resVsPt_z0_%d_%d", seed, i),
+      ";z_{0} residual (L1 - sim) [cm]; L1 tracks / 0.02", 100, -1, 1);
+    }
+
+  }
   // ----------------------------------------------------------------------------------------------------------------
   // more resolution vs eta
 
@@ -1240,7 +1304,7 @@ void L1TrackNtuplePlot(TString type,
       }
 
       // kinematic cuts
-      if (std::abs(tp_lxy->at(it)) > TP_maxLxy)
+      if (std::abs(tp_dxy->at(it)) > TP_maxDxy)
         continue;
       if (std::abs(tp_d0->at(it)) > TP_maxD0)
         continue;
@@ -1506,10 +1570,30 @@ void L1TrackNtuplePlot(TString type,
       // fill resolution histograms
 
       h_res_pt->Fill(matchtrk_pt->at(it) - tp_pt->at(it));
+
+
+      for (int seed = 0; seed < seedNum; seed++) {
+
+        if ((*matchtrk_seed)[it] == seed) {
+              // Ensure h_res_pt_seed[seed] is a valid pointer to a TH1F object
+
+              h_res_pt_seed[seed]->Fill(matchtrk_pt->at(it) - tp_pt->at(it));
+              h_res_z0_seed[seed]->Fill(matchtrk_z0->at(it) - tp_z0->at(it));
+
+
+        }
+
+      }
+
       h_res_ptRel->Fill((matchtrk_pt->at(it) - tp_pt->at(it)) / tp_pt->at(it));
       h_res_eta->Fill(matchtrk_eta->at(it) - tp_eta->at(it));
       h_res_phi->Fill(matchtrk_phi->at(it) - tp_phi->at(it));
+
+
       h_res_z0->Fill(matchtrk_z0->at(it) - tp_z0->at(it));
+
+
+
       if (matchtrk_d0->at(it) < 999.)
         h_res_d0->Fill(matchtrk_d0->at(it) - tp_d0->at(it));
 
@@ -1562,9 +1646,14 @@ void L1TrackNtuplePlot(TString type,
       for (int im = 0; im < nRANGE; im++) {
         if ((tp_pt->at(it) > (float)im * 5.0) && (tp_pt->at(it) < (float)(im + 1) * 5.0)) {
           h_resVsPt_pt[im]->Fill(matchtrk_pt->at(it) - tp_pt->at(it));
+          // Loop over seeds and fill histograms
+
+
           h_resVsPt_ptRel[im]->Fill((matchtrk_pt->at(it) - tp_pt->at(it)) / tp_pt->at(it));
           h_resVsPt_eta[im]->Fill(matchtrk_eta->at(it) - tp_eta->at(it));
           h_resVsPt_phi[im]->Fill(matchtrk_phi->at(it) - tp_phi->at(it));
+
+
           h_resVsPt_z0[im]->Fill(matchtrk_z0->at(it) - tp_z0->at(it));
 
           h_absResVsPt_pt[im]->Fill(std::abs(matchtrk_pt->at(it) - tp_pt->at(it)));
@@ -1596,7 +1685,22 @@ void L1TrackNtuplePlot(TString type,
           }
         }
       }
+      for (int seed = 0; seed < seedNum; seed++) {
 
+        for (int im = 0; im < nRANGE; im++){
+          if ((tp_pt->at(it) > (float)im * 5.0) && (tp_pt->at(it) < (float)(im + 1) * 5.0)){
+
+            if ((*matchtrk_seed)[it] == seed) {
+          // Ensure h_res_pt_seed[seed] is a valid pointer to a TH1F object
+
+                 h_resVsPt_pt_seed[seed][im]->Fill(matchtrk_pt->at(it) - tp_pt->at(it));
+                 h_resVsPt_z0_seed[seed][im]->Fill(matchtrk_z0->at(it) - tp_z0->at(it));
+
+
+            }
+           }
+        }
+      }
       for (int im = 3; im < nRANGE_L + 3; im++) {
         if ((tp_pt->at(it) > (float)im * 0.5) && (tp_pt->at(it) <= (float)(im + 1) * 0.5)) {
           h_absResVsPt_pt_L[im - 3]->Fill(std::abs(matchtrk_pt->at(it) - tp_pt->at(it)));
@@ -1704,6 +1808,15 @@ void L1TrackNtuplePlot(TString type,
   // ----------------------------------------------------------------------------------------------------------------
 
   TH1F* h2_resVsPt_pt = new TH1F("resVsPt2_pt", ";Tracking particle p_{T} [GeV]; p_{T} resolution [GeV]", 20, 0, 100);
+
+  std::vector<TH1F*> h2_resVsPt_pt_seed(seedNum);
+  for (int seed = 0; seed < seedNum; seed++) {
+
+    h2_resVsPt_pt_seed[seed]= new TH1F(Form("resVsPt2_pt_seed_%d", seed), ";Tracking particle p_{T} [GeV]; p_{T} resolution [GeV]", 20, 0, 100);
+  }
+
+
+
   TH1F* h2_resVsPt_pt_C =
       new TH1F("resVsPt2_pt_C", ";Tracking particle p_{T} [GeV]; p_{T} resolution [GeV]", 20, 0, 100);
   TH1F* h2_resVsPt_pt_I =
@@ -1722,6 +1835,14 @@ void L1TrackNtuplePlot(TString type,
 
   TH1F* h2_mresVsPt_pt =
       new TH1F("mresVsPt2_pt", ";Tracking particle p_{T} [GeV]; Mean(p_{T} residual) [GeV]", 20, 0, 100);
+
+  std::vector<TH1F*> h2_mresVsPt_pt_seed(seedNum);
+  for (int seed = 0; seed < seedNum; seed++) {
+
+    h2_mresVsPt_pt_seed[seed]= new TH1F(Form("mresVsPt2_pt_%d", seed), ";Tracking particle p_{T} [GeV]; Mean(p_{T} residual) [GeV]", 20, 0, 100);
+  }
+
+
   TH1F* h2_mresVsPt_pt_C =
       new TH1F("mresVsPt2_pt_C", ";Tracking particle p_{T} [GeV]; Mean(p_{T} residual) [GeV]", 20, 0, 100);
   TH1F* h2_mresVsPt_pt_I =
@@ -1730,6 +1851,13 @@ void L1TrackNtuplePlot(TString type,
       new TH1F("mresVsPt2_pt_F", ";Tracking particle p_{T} [GeV]; Mean(p_{T} residual) [GeV]", 20, 0, 100);
 
   TH1F* h2_resVsPt_z0 = new TH1F("resVsPt2_z0", ";Tracking particle p_{T} [GeV]; z_{0} resolution [cm]", 20, 0, 100);
+
+  std::vector<TH1F*> h2_resVsPt_z0_seed(seedNum);
+  for (int seed = 0; seed < seedNum; seed++) {
+
+    h2_resVsPt_z0_seed[seed]= new TH1F(Form("resVsPt2_z0_seed_%d", seed), ";Tracking particle p_{T} [GeV]; z_{0} resolution [cm]", 20, 0, 100);
+  }
+
   TH1F* h2_resVsPt_z0_C =
       new TH1F("resVsPt2_z0_C", ";Tracking particle p_{T} [GeV]; z_{0} resolution [cm]", 20, 0, 100);
   TH1F* h2_resVsPt_z0_I =
@@ -1824,10 +1952,33 @@ void L1TrackNtuplePlot(TString type,
   TH1F* h2_resVsPt_d0_L_99 =
       new TH1F("resVsPt2_d0_L_99", ";Tracking particle p_{T} [GeV]; d_{0} resolution [cm]", nRANGE_L, pt_resmin, 8);
 
+
+
+
+  for (int seed = 0; seed < seedNum; seed++) {
+    for (int i = 0; i < nRANGE; i++) {
+
+      h2_resVsPt_pt_seed[seed]->SetBinContent(i + 1, h_resVsPt_pt_seed[seed][i]->GetRMS());
+      h2_resVsPt_pt_seed[seed]->SetBinError(i + 1, h_resVsPt_pt_seed[seed][i]->GetRMSError());
+
+
+      h2_mresVsPt_pt_seed[seed]->SetBinContent(i + 1, h_resVsPt_pt_seed[seed][i]->GetMean());
+      h2_mresVsPt_pt_seed[seed]->SetBinError(i + 1, h_resVsPt_pt_seed[seed][i]->GetMeanError());
+
+
+      h2_resVsPt_z0_seed[seed]->SetBinContent(i + 1, h_resVsPt_z0_seed[seed][i]->GetRMS());
+      h2_resVsPt_z0_seed[seed]->SetBinError(i + 1, h_resVsPt_z0_seed[seed][i]->GetRMSError());
+      }
+  }
+
+
+
   for (int i = 0; i < nRANGE; i++) {
     // set bin content and error
     h2_resVsPt_pt->SetBinContent(i + 1, h_resVsPt_pt[i]->GetRMS());
     h2_resVsPt_pt->SetBinError(i + 1, h_resVsPt_pt[i]->GetRMSError());
+
+
     h2_resVsPt_pt_C->SetBinContent(i + 1, h_resVsPt_pt_C[i]->GetRMS());
     h2_resVsPt_pt_C->SetBinError(i + 1, h_resVsPt_pt_C[i]->GetRMSError());
     h2_resVsPt_pt_I->SetBinContent(i + 1, h_resVsPt_pt_I[i]->GetRMS());
@@ -1846,6 +1997,9 @@ void L1TrackNtuplePlot(TString type,
 
     h2_mresVsPt_pt->SetBinContent(i + 1, h_resVsPt_pt[i]->GetMean());
     h2_mresVsPt_pt->SetBinError(i + 1, h_resVsPt_pt[i]->GetMeanError());
+
+
+
     h2_mresVsPt_pt_C->SetBinContent(i + 1, h_resVsPt_pt_C[i]->GetMean());
     h2_mresVsPt_pt_C->SetBinError(i + 1, h_resVsPt_pt_C[i]->GetMeanError());
     h2_mresVsPt_pt_I->SetBinContent(i + 1, h_resVsPt_pt_I[i]->GetMean());
@@ -1855,6 +2009,8 @@ void L1TrackNtuplePlot(TString type,
 
     h2_resVsPt_z0->SetBinContent(i + 1, h_resVsPt_z0[i]->GetRMS());
     h2_resVsPt_z0->SetBinError(i + 1, h_resVsPt_z0[i]->GetRMSError());
+
+
     h2_resVsPt_z0_C->SetBinContent(i + 1, h_resVsPt_z0_C[i]->GetRMS());
     h2_resVsPt_z0_C->SetBinError(i + 1, h_resVsPt_z0_C[i]->GetRMSError());
     h2_resVsPt_z0_I->SetBinContent(i + 1, h_resVsPt_z0_I[i]->GetRMS());
@@ -2389,6 +2545,13 @@ void L1TrackNtuplePlot(TString type,
 
   // set minimum to zero
   h2_resVsPt_pt->SetMinimum(0);
+  for (int seed = 0; seed < seedNum; seed++) {
+    h2_resVsPt_pt_seed[seed]->SetMinimum(0);
+    h2_resVsPt_z0_seed[seed]->SetMinimum(0);
+
+    }
+
+
   h2_resVsPt_pt_C->SetMinimum(0);
   h2_resVsPt_pt_I->SetMinimum(0);
   h2_resVsPt_pt_F->SetMinimum(0);
@@ -2399,6 +2562,8 @@ void L1TrackNtuplePlot(TString type,
   h2_resVsPt_ptRel_F->SetMinimum(0);
 
   h2_resVsPt_z0->SetMinimum(0);
+
+
   h2_resVsPt_z0_C->SetMinimum(0);
   h2_resVsPt_z0_I->SetMinimum(0);
   h2_resVsPt_z0_F->SetMinimum(0);
@@ -2627,6 +2792,13 @@ void L1TrackNtuplePlot(TString type,
     h2_resVsPt_eta->Write();
 
     h2_resVsPt_pt->Write();
+    for (int seed = 0; seed < seedNum; seed++) {
+
+      h2_resVsPt_pt_seed[seed]->Write();
+      h2_resVsPt_z0_seed[seed]->Write();
+      }
+
+
     h2_resVsPt_pt_C->Write();
     h2_resVsPt_pt_I->Write();
     h2_resVsPt_pt_F->Write();
@@ -2643,7 +2815,11 @@ void L1TrackNtuplePlot(TString type,
 
     h2_resVsPt_d0->Write();
 
+
+    h2_resVsPt_z0->Write();
     h2_resVsPt_z0_C->Write();
+
+
     h2_resVsPt_z0_I->Write();
     h2_resVsPt_z0_F->Write();
 
@@ -3192,6 +3368,15 @@ void L1TrackNtuplePlot(TString type,
     mySmallText(0.22, 0.82, 1, ctxt);
     c.SaveAs(DIR + type + "_res_pt.pdf");
 
+    for (int seed = 0; seed < seedNum; seed++) {
+    h_res_pt_seed[seed]->Draw();
+    rms = h_res_pt_seed[seed]->GetRMS();
+    sprintf(ctxt, "RMS = %.4f", rms);
+    mySmallText(0.22, 0.82, 1, ctxt);
+      c.SaveAs(Form("%s%s_res_pt_seed%d.pdf", DIR.Data(), type.Data(), seed));
+    }
+
+
     h_res_ptRel->Draw();
     rms = h_res_ptRel->GetRMS();
     sprintf(ctxt, "RMS = %.4f", rms);
@@ -3215,6 +3400,15 @@ void L1TrackNtuplePlot(TString type,
     sprintf(ctxt, "RMS = %.4f", rms);
     mySmallText(0.22, 0.82, 1, ctxt);
     c.SaveAs(DIR + type + "_res_z0.pdf");
+
+
+    for (int seed = 0; seed < seedNum; seed++) {
+      h_res_z0_seed[seed]->Draw();
+      rms = h_res_z0_seed[seed]->GetRMS();
+      sprintf(ctxt, "RMS = %.4f", rms);
+      mySmallText(0.22, 0.82, 1, ctxt);
+      c.SaveAs(Form("%s%s_res_z0_seed%d.pdf", DIR.Data(), type.Data(), seed));
+    }
 
     h_res_z0_C->Draw();
     rms = h_res_z0_C->GetRMS();
