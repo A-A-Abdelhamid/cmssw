@@ -601,8 +601,8 @@ void L1TrackNtuplePlot(TString type,
   /*
   const int nETARANGE = 12;
   TString etarange[nETARANGE] = {"0.2","0.4","0.6","0.8","1.0",
-				 "1.2","1.4","1.6","1.8","2.0",
-				 "2.2","2.4"};
+                 "1.2","1.4","1.6","1.8","2.0",
+                 "2.2","2.4"};
   */
 
   TH1F* h_absResVsEta_eta[nETARANGE];
@@ -970,7 +970,7 @@ void L1TrackNtuplePlot(TString type,
       h_resVsPt_pt_seed[seed][i] = new TH1F(
        Form("resVsPt_pt__%d_%d", seed, i), ";p_{T} residual (L1 - sim) [GeV]; L1 tracks / 0.1", 100, -5.0, 5.0);
       h_resVsPt_z0_seed[seed][i] = new TH1F(Form("resVsPt_z0_%d_%d", seed, i),
-      ";z_{0} residual (L1 - sim) [cm]; L1 tracks / 0.02", 100, -1, 1);
+      ";z_{0} residual (L1 - sim) [cm]; L1 tracks / 0.02", 100, -10, 10);
     }
 
   }
@@ -1101,20 +1101,20 @@ void L1TrackNtuplePlot(TString type,
     if (TP_select_injet > 0) {
       for (int ij=0; ij<(int)jet_tp_sumpt->size(); ij++) {
 
-	float fraction = 0;
-	float fractionMatch = 0;
-	if (jet_tp_sumpt->at(ij) > 0) {
-	  fraction = jet_trk_sumpt->at(ij)/jet_tp_sumpt->at(ij);
-	  fractionMatch = jet_matchtrk_sumpt->at(ij)/jet_tp_sumpt->at(ij);
-	}
+    float fraction = 0;
+    float fractionMatch = 0;
+    if (jet_tp_sumpt->at(ij) > 0) {
+      fraction = jet_trk_sumpt->at(ij)/jet_tp_sumpt->at(ij);
+      fractionMatch = jet_matchtrk_sumpt->at(ij)/jet_tp_sumpt->at(ij);
+    }
 
-	h_jet_tp_sumpt_vspt->Fill(jet_tp_sumpt->at(ij),1.0);
-	h_jet_trk_sumpt_vspt->Fill(jet_tp_sumpt->at(ij),fraction);
-	h_jet_matchtrk_sumpt_vspt->Fill(jet_tp_sumpt->at(ij),fractionMatch);
+    h_jet_tp_sumpt_vspt->Fill(jet_tp_sumpt->at(ij),1.0);
+    h_jet_trk_sumpt_vspt->Fill(jet_tp_sumpt->at(ij),fraction);
+    h_jet_matchtrk_sumpt_vspt->Fill(jet_tp_sumpt->at(ij),fractionMatch);
 
-	h_jet_tp_sumpt_vseta->Fill(jet_eta->at(ij),1.0);
-	h_jet_trk_sumpt_vseta->Fill(jet_eta->at(ij),fraction);
-	h_jet_matchtrk_sumpt_vseta->Fill(jet_eta->at(ij),fractionMatch);
+    h_jet_tp_sumpt_vseta->Fill(jet_eta->at(ij),1.0);
+    h_jet_trk_sumpt_vseta->Fill(jet_eta->at(ij),fraction);
+    h_jet_matchtrk_sumpt_vseta->Fill(jet_eta->at(ij),fractionMatch);
       }
     }
     */
@@ -1492,8 +1492,8 @@ void L1TrackNtuplePlot(TString type,
       // use tight quality cut selection?
       /*
       if (matchtrk_nstub->at(it)==4) {
-	if (std::abs(matchtrk_eta->at(it))<2.2 && matchtrk_consistency->at(it)>10) continue;
-	else if (std::abs(matchtrk_eta->at(it))>2.2 && chi2dof>5.0) continue;
+    if (std::abs(matchtrk_eta->at(it))<2.2 && matchtrk_consistency->at(it)>10) continue;
+    else if (std::abs(matchtrk_eta->at(it))>2.2 && chi2dof>5.0) continue;
       }
       if (matchtrk_pt->at(it)>10.0 && chi2dof>5.0) continue;
       */
@@ -1656,6 +1656,24 @@ void L1TrackNtuplePlot(TString type,
 
           h_resVsPt_z0[im]->Fill(matchtrk_z0->at(it) - tp_z0->at(it));
 
+
+
+          for (int seed = 0; seed < seedNum; seed++) {
+
+            for (int im = 0; im < nRANGE; im++){
+
+
+                if ((*matchtrk_seed)[it] == seed) {
+                  // Ensure h_res_pt_seed[seed] is a valid pointer to a TH1F object
+
+
+                  h_resVsPt_z0_seed[seed][im]->Fill(matchtrk_z0->at(it) - tp_z0->at(it));
+
+
+
+              }
+            }
+          }
           h_absResVsPt_pt[im]->Fill(std::abs(matchtrk_pt->at(it) - tp_pt->at(it)));
           h_absResVsPt_ptRel[im]->Fill(std::abs((matchtrk_pt->at(it) - tp_pt->at(it))) / tp_pt->at(it));
           h_absResVsPt_z0[im]->Fill(std::abs(matchtrk_z0->at(it) - tp_z0->at(it)));
@@ -1808,11 +1826,11 @@ void L1TrackNtuplePlot(TString type,
   // ----------------------------------------------------------------------------------------------------------------
 
   TH1F* h2_resVsPt_pt = new TH1F("resVsPt2_pt", ";Tracking particle p_{T} [GeV]; p_{T} resolution [GeV]", 20, 0, 100);
-
+  double arr[]={0,10,20,30,40,50,60,70,80,90,100};
   std::vector<TH1F*> h2_resVsPt_pt_seed(seedNum);
   for (int seed = 0; seed < seedNum; seed++) {
 
-    h2_resVsPt_pt_seed[seed]= new TH1F(Form("resVsPt2_pt_seed_%d", seed), ";Tracking particle p_{T} [GeV]; p_{T} resolution [GeV]", 20, 0, 100);
+    h2_resVsPt_pt_seed[seed]= new TH1F(Form("resVsPt2_pt_seed_%d", seed), ";Tracking particle p_{T} [GeV]; p_{T} resolution [GeV]", 10, arr);
   }
 
 
@@ -1855,7 +1873,7 @@ void L1TrackNtuplePlot(TString type,
   std::vector<TH1F*> h2_resVsPt_z0_seed(seedNum);
   for (int seed = 0; seed < seedNum; seed++) {
 
-    h2_resVsPt_z0_seed[seed]= new TH1F(Form("resVsPt2_z0_seed_%d", seed), ";Tracking particle p_{T} [GeV]; z_{0} resolution [cm]", 20, 0, 100);
+    h2_resVsPt_z0_seed[seed]= new TH1F(Form("resVsPt2_z0_seed_%d", seed), ";Tracking particle p_{T} [GeV]; z_{0} resolution [cm]", 8, 0, 100);
   }
 
   TH1F* h2_resVsPt_z0_C =
@@ -3368,9 +3386,23 @@ void L1TrackNtuplePlot(TString type,
     mySmallText(0.22, 0.82, 1, ctxt);
     c.SaveAs(DIR + type + "_res_pt.pdf");
 
-/*
+
     // Create a canvas
     TCanvas *canvas = new TCanvas("canvas", "All Plots on One Canvas", 800, 600);
+
+    // Variable to find the global maximum y-value
+    double maxY = 0.0;
+
+    // Loop to find the highest y-axis value
+    for (int seed = 0; seed < seedNum; seed++) {
+      double thisMax = h_res_pt_seed[seed]->GetMaximum();
+      if (thisMax > maxY) {
+        maxY = thisMax; // Update maxY if this histogram has a larger maximum
+      }
+    }
+
+    // Adjust the maximum y-axis range for the first histogram
+    h_res_pt_seed[0]->SetMaximum(maxY * 1.1); // Add 10% padding above the maximum
 
     // Create a legend
     TLegend *legend = new TLegend(0.7, 0.7, 0.9, 0.9); // Adjust the position as needed
@@ -3402,7 +3434,168 @@ void L1TrackNtuplePlot(TString type,
 
     // Save the canvas as a single file
     canvas->SaveAs(Form("%s%s_res_pt_all_seeds.pdf", DIR.Data(), type.Data()));
-*/
+
+    // Create a canvas
+    TCanvas *canvasz = new TCanvas("canvasz", "All Plots on One Canvas", 800, 600);
+
+    // Variable to find the global maximum y-value
+    double maxYz = 0.0;
+
+    // Loop to find the highest y-axis value across all seeds and ranges
+    for (int seed = 0; seed < seedNum; seed++) {
+      for (int i = 0; i < nRANGE; i++) {
+          if (h_resVsPt_pt_seed[seed][i]) { // Ensure the histogram exists
+              double thisMax = h_resVsPt_pt_seed[seed][i]->GetMaximum();
+              if (thisMax > maxYz) {
+                  maxYz = thisMax; // Update maxY if this histogram has a larger maximum
+              }
+          }
+      }
+    }
+
+  // Adjust the maximum y-axis range for the first histogram (first seed and range)
+    if (h_resVsPt_pt_seed[0][0]) {
+      h_resVsPt_pt_seed[0][0]->SetMaximum(maxYz * 1.1); // Add 10% padding above the maximum
+    }
+
+    // Create a legend
+    TLegend *legendz = new TLegend(0.7, 0.7, 0.9, 0.9); // Adjust the position as needed
+
+    // Loop over seeds and ranges to draw histograms on the same canvas
+    for (int seed = 0; seed < seedNum; seed++) {
+      for (int i = 0; i < nRANGE; i++) {
+          if (h_resVsPt_pt_seed[seed][i]) { // Ensure the histogram exists
+              if (seed == 0 && i == 0) {
+                // Draw the first histogram without "SAME"
+                h_resVsPt_pt_seed[seed][i]->SetLineColor(seed + i + 1); // Assign different colors
+                h_resVsPt_pt_seed[seed][i]->Draw();
+            } else {
+                // Draw subsequent histograms with "SAME"
+                h_resVsPt_pt_seed[seed][i]->SetLineColor(seed + i + 1); // Assign different colors
+                h_resVsPt_pt_seed[seed][i]->Draw("SAME");
+            }
+
+            // Add an entry to the legend
+            legendz->AddEntry(h_resVsPt_pt_seed[seed][i], Form("Seed %d, Range %d", seed, i), "l");
+
+            // Optionally, calculate and display RMS on the canvas
+            double rms = h_resVsPt_pt_seed[seed][i]->GetRMS();
+            char ctxt[100];
+            sprintf(ctxt, "RMS = %.4f", rms);
+            mySmallText(0.22, 0.82 - (seed * nRANGE + i) * 0.03, 1, ctxt); // Adjust position dynamically
+          }
+      }
+    }
+
+    // Draw the legend
+    legendz->Draw();
+
+    // Save the canvas as a single file
+    canvasz->SaveAs(Form("%s%s_h_resVsPt_pt_seed_all_seeds.pdf", DIR.Data(), type.Data()));
+
+
+
+    TCanvas *canvasRes = new TCanvas("canvasRes", "pT Resolution vs tp pT", 800, 600);
+
+    // Ensure different colors for each seed
+    int colors[] = {kRed, kBlue, kGreen, kMagenta, kOrange, kCyan,kYellow,kPink,kRed+1,kBlue+1,kGreen+1,kGreen+2};
+
+    // Loop to draw each seed's resolution histogram
+    for (int seed = 0; seed < seedNum; seed++) {
+      h2_resVsPt_pt_seed[seed]->SetLineColor(colors[seed % 6]); // Cycle through colors
+      h2_resVsPt_pt_seed[seed]->SetMarkerColor(colors[seed % 6]);
+      h2_resVsPt_pt_seed[seed]->SetMarkerStyle(20 + seed);
+
+      if (seed == 0) {
+        h2_resVsPt_pt_seed[seed]->Draw("hist"); // First histogram
+      } else {
+        h2_resVsPt_pt_seed[seed]->Draw("hist SAME"); // Overlay subsequent histograms
+      }
+    }
+
+    // Add a legend
+    TLegend *legendRes = new TLegend(0.7, 0.7, 0.9, 0.9);
+    for (int seed = 0; seed < seedNum; seed++) {
+      legendRes->AddEntry(h2_resVsPt_pt_seed[seed], Form("Seed %d", seed), "lep");
+    }
+    legendRes->Draw();
+
+    // Save the canvas
+
+    canvasRes->SaveAs(Form("%s%s_h2_resolution_vs_tp_pt.pdf", DIR.Data(), type.Data()));
+
+    TCanvas *canvaszpt = new TCanvas("canvaszpt", "z0 Resolution vs tp pT", 800, 600);
+
+    // Ensure different colors for each seed
+
+    double maxYzres = 0.0;
+
+    // Loop to find the highest y-axis value across all seeds and ranges
+    for (int seed = 0; seed < seedNum; seed++) {
+      
+          if (h2_resVsPt_z0_seed[seed]) { // Ensure the histogram exists
+              double thisMax = h2_resVsPt_z0_seed[seed]->GetMaximum();
+              if (thisMax > maxYzres) {
+                  maxYzres = thisMax; // Update maxY if this histogram has a larger maximum
+              }
+          
+      }
+    }
+
+    h2_resVsPt_z0_seed[0]->SetMaximum(maxYzres * 1.1);
+    // Loop to draw each seed's resolution histogram
+    for (int seed = 0; seed < seedNum; seed++) {
+      h2_resVsPt_z0_seed[seed]->SetLineColor(colors[seed]); // Cycle through colors
+      h2_resVsPt_z0_seed[seed]->SetMarkerColor(colors[seed]);
+      h2_resVsPt_z0_seed[seed]->SetMarkerStyle(20+seed);
+
+      if (seed == 0) {
+       h2_resVsPt_z0_seed[seed]->Draw("hist"); // First histogram
+      } else {
+        h2_resVsPt_z0_seed[seed]->Draw("hist SAME"); // Overlay subsequent histograms
+      }
+    }
+
+    // Add a legend
+    TLegend *legendzpt = new TLegend(0.7, 0.7, 0.9, 0.9);
+    for (int seed = 0; seed < seedNum; seed++) {
+      legendzpt->AddEntry(h2_resVsPt_z0_seed[seed], Form("Seed %d", seed), "lep");
+    }
+    legendzpt->Draw();
+
+    // Save the canvas
+    canvaszpt->SaveAs(Form("%s%s_this.pdf", DIR.Data(), type.Data()));
+
+
+    TCanvas *canvasResc = new TCanvas("canvasRes", "pT Resolution vs tp pT", 800, 600);
+
+    // Ensure different colors for each seed
+    int colorsc[] = {kRed, kBlue, kGreen, kMagenta, kOrange, kCyan};
+
+    // Loop to draw each seed's resolution histogram
+    for (int seed = 0; seed < seedNum; seed++) {
+      h2_resVsPt_pt_seed[seed]->SetLineColor(colors[seed % 6]); // Cycle through colors
+      //h2_resVsPt_pt_seed[seed]->SetMarkerColor(colors[seed % 6]);
+      h2_resVsPt_pt_seed[seed]->SetMarkerStyle(20);
+
+      if (seed == 0) {
+        h2_resVsPt_pt_seed[seed]->Draw("p"); // First histogram
+      } else {
+        h2_resVsPt_pt_seed[seed]->Draw("p SAME"); // Overlay subsequent histograms
+      }
+    }
+
+    // Add a legend
+    TLegend *legendc = new TLegend(0.7, 0.7, 0.9, 0.9);
+    for (int seed = 0; seed < seedNum; seed++) {
+      legendc->AddEntry(h2_resVsPt_pt_seed[seed], Form("Seed %d", seed), "lep");
+    }
+    legendc->Draw();
+
+    // Save the canvas
+    canvasResc->SaveAs(Form("%s%s_h2_resolution_vs_tp_pt.pdf", DIR.Data(), type.Data()));
+
+
 
     h_res_ptRel->Draw();
     rms = h_res_ptRel->GetRMS();
