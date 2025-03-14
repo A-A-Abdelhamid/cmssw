@@ -246,6 +246,53 @@ private:
   std::vector<int>* m_matchtrk_injet_highpt;
   std::vector<int>* m_matchtrk_injet_vhighpt;
 
+  std::vector<float>* m_allmatchtrk_pt;
+  std::vector<float>* m_allmatchtrk_eta;
+  std::vector<float>* m_allmatchtrk_phi;
+  std::vector<float>* m_allmatchtrk_d0;  //this variable is only filled if L1Tk_nPar==5
+  std::vector<float>* m_allmatchtrk_z0;
+  std::vector<float>* m_allmatchtrk_chi2;
+  std::vector<float>* m_allmatchtrk_chi2_dof;
+  std::vector<float>* m_allmatchtrk_chi2rphi;
+  std::vector<float>* m_allmatchtrk_chi2rphi_dof;
+  std::vector<float>* m_allmatchtrk_chi2rz;
+  std::vector<float>* m_allmatchtrk_chi2rz_dof;
+  std::vector<float>* m_allmatchtrk_bendchi2;
+  std::vector<float>* m_allmatchtrk_MVA1;
+  std::vector<int>* m_allmatchtrk_nstub;
+  std::vector<int>* m_allmatchtrk_lhits;
+  std::vector<int>* m_allmatchtrk_dhits;
+  std::vector<int>* m_allmatchtrk_seed;
+  std::vector<int>* m_allmatchtrk_hitpattern;
+  std::vector<int>* m_allmatchtrk_charge;
+  std::vector<int>* m_allmatchtrk_injet;
+  std::vector<int>* m_allmatchtrk_injet_highpt;
+  std::vector<int>* m_allmatchtrk_injet_vhighpt;
+
+
+
+  std::vector<float>* m_nocutallmatchtrk_pt;
+  std::vector<float>* m_nocutallmatchtrk_eta;
+  std::vector<float>* m_nocutallmatchtrk_phi;
+  std::vector<float>* m_nocutallmatchtrk_d0;  //this variable is only filled if L1Tk_nPar==5
+  std::vector<float>* m_nocutallmatchtrk_z0;
+  std::vector<float>* m_nocutallmatchtrk_chi2;
+  std::vector<float>* m_nocutallmatchtrk_chi2_dof;
+  std::vector<float>* m_nocutallmatchtrk_chi2rphi;
+  std::vector<float>* m_nocutallmatchtrk_chi2rphi_dof;
+  std::vector<float>* m_nocutallmatchtrk_chi2rz;
+  std::vector<float>* m_nocutallmatchtrk_chi2rz_dof;
+  std::vector<float>* m_nocutallmatchtrk_bendchi2;
+  std::vector<float>* m_nocutallmatchtrk_MVA1;
+  std::vector<int>* m_nocutallmatchtrk_nstub;
+  std::vector<int>* m_nocutallmatchtrk_lhits;
+  std::vector<int>* m_nocutallmatchtrk_dhits;
+  std::vector<int>* m_nocutallmatchtrk_seed;
+  std::vector<int>* m_nocutallmatchtrk_hitpattern;
+  std::vector<int>* m_nocutallmatchtrk_charge;
+  std::vector<int>* m_nocutallmatchtrk_injet;
+  std::vector<int>* m_nocutallmatchtrk_injet_highpt;
+  std::vector<int>* m_nocutallmatchtrk_injet_vhighpt;
   // ALL stubs
   std::vector<float>* m_allstub_x;
   std::vector<float>* m_allstub_y;
@@ -425,6 +472,53 @@ void L1TrackNtupleMaker::endJob() {
   delete m_matchtrk_injet_highpt;
   delete m_matchtrk_injet_vhighpt;
 
+  delete m_allmatchtrk_pt;
+  delete m_allmatchtrk_eta;
+  delete m_allmatchtrk_phi;
+  delete m_allmatchtrk_z0;
+  delete m_allmatchtrk_d0;
+  delete m_allmatchtrk_chi2;
+  delete m_allmatchtrk_chi2_dof;
+  delete m_allmatchtrk_chi2rphi;
+  delete m_allmatchtrk_chi2rphi_dof;
+  delete m_allmatchtrk_chi2rz;
+  delete m_allmatchtrk_chi2rz_dof;
+  delete m_allmatchtrk_bendchi2;
+  delete m_allmatchtrk_MVA1;
+  delete m_allmatchtrk_nstub;
+  delete m_allmatchtrk_dhits;
+  delete m_allmatchtrk_lhits;
+  delete m_allmatchtrk_seed;
+  delete m_allmatchtrk_hitpattern;
+  delete m_allmatchtrk_charge;
+  delete m_allmatchtrk_injet;
+  delete m_allmatchtrk_injet_highpt;
+  delete m_allmatchtrk_injet_vhighpt;
+
+
+  delete m_nocutallmatchtrk_pt;
+  delete m_nocutallmatchtrk_eta;
+  delete m_nocutallmatchtrk_phi;
+  delete m_nocutallmatchtrk_z0;
+  delete m_nocutallmatchtrk_d0;
+  delete m_nocutallmatchtrk_chi2;
+  delete m_nocutallmatchtrk_chi2_dof;
+  delete m_nocutallmatchtrk_chi2rphi;
+  delete m_nocutallmatchtrk_chi2rphi_dof;
+  delete m_nocutallmatchtrk_chi2rz;
+  delete m_nocutallmatchtrk_chi2rz_dof;
+  delete m_nocutallmatchtrk_bendchi2;
+  delete m_nocutallmatchtrk_MVA1;
+  delete m_nocutallmatchtrk_nstub;
+  delete m_nocutallmatchtrk_dhits;
+  delete m_nocutallmatchtrk_lhits;
+  delete m_nocutallmatchtrk_seed;
+  delete m_nocutallmatchtrk_hitpattern;
+  delete m_nocutallmatchtrk_charge;
+  delete m_nocutallmatchtrk_injet;
+  delete m_nocutallmatchtrk_injet_highpt;
+  delete m_nocutallmatchtrk_injet_vhighpt;
+
   delete m_allstub_x;
   delete m_allstub_y;
   delete m_allstub_z;
@@ -549,6 +643,53 @@ void L1TrackNtupleMaker::beginJob() {
   m_matchtrk_injet_highpt = new std::vector<int>;
   m_matchtrk_injet_vhighpt = new std::vector<int>;
 
+
+  m_allmatchtrk_pt = new std::vector<float>;
+  m_allmatchtrk_eta = new std::vector<float>;
+  m_allmatchtrk_phi = new std::vector<float>;
+  m_allmatchtrk_z0 = new std::vector<float>;
+  m_allmatchtrk_d0 = new std::vector<float>;
+  m_allmatchtrk_chi2 = new std::vector<float>;
+  m_allmatchtrk_chi2_dof = new std::vector<float>;
+  m_allmatchtrk_chi2rphi = new std::vector<float>;
+  m_allmatchtrk_chi2rphi_dof = new std::vector<float>;
+  m_allmatchtrk_chi2rz = new std::vector<float>;
+  m_allmatchtrk_chi2rz_dof = new std::vector<float>;
+  m_allmatchtrk_bendchi2 = new std::vector<float>;
+  m_allmatchtrk_MVA1 = new std::vector<float>;
+  m_allmatchtrk_nstub = new std::vector<int>;
+  m_allmatchtrk_dhits = new std::vector<int>;   
+  m_allmatchtrk_lhits = new std::vector<int>;
+  m_allmatchtrk_seed = new std::vector<int>;
+  m_allmatchtrk_hitpattern = new std::vector<int>;
+  m_allmatchtrk_charge = new std::vector<int>;
+  m_allmatchtrk_injet = new std::vector<int>;
+  m_allmatchtrk_injet_highpt = new std::vector<int>;
+  m_allmatchtrk_injet_vhighpt = new std::vector<int>;
+
+  m_nocutallmatchtrk_pt = new std::vector<float>;
+  m_nocutallmatchtrk_eta = new std::vector<float>;
+  m_nocutallmatchtrk_phi = new std::vector<float>;
+  m_nocutallmatchtrk_z0 = new std::vector<float>;
+  m_nocutallmatchtrk_d0 = new std::vector<float>;
+  m_nocutallmatchtrk_chi2 = new std::vector<float>;
+  m_nocutallmatchtrk_chi2_dof = new std::vector<float>;
+  m_nocutallmatchtrk_chi2rphi = new std::vector<float>;
+  m_nocutallmatchtrk_chi2rphi_dof = new std::vector<float>;
+  m_nocutallmatchtrk_chi2rz = new std::vector<float>;
+  m_nocutallmatchtrk_chi2rz_dof = new std::vector<float>;
+  m_nocutallmatchtrk_bendchi2 = new std::vector<float>;
+  m_nocutallmatchtrk_MVA1 = new std::vector<float>;
+  m_nocutallmatchtrk_nstub = new std::vector<int>;
+  m_nocutallmatchtrk_dhits = new std::vector<int>;   
+  m_nocutallmatchtrk_lhits = new std::vector<int>;
+  m_nocutallmatchtrk_seed = new std::vector<int>;
+  m_nocutallmatchtrk_hitpattern = new std::vector<int>;
+  m_nocutallmatchtrk_charge = new std::vector<int>;
+  m_nocutallmatchtrk_injet = new std::vector<int>;
+  m_nocutallmatchtrk_injet_highpt = new std::vector<int>;
+  m_nocutallmatchtrk_injet_vhighpt = new std::vector<int>;
+
   m_allstub_x = new std::vector<float>;
   m_allstub_y = new std::vector<float>;
   m_allstub_z = new std::vector<float>;
@@ -672,6 +813,58 @@ void L1TrackNtupleMaker::beginJob() {
     eventTree->Branch("matchtrk_injet_highpt", &m_matchtrk_injet_highpt);
     eventTree->Branch("matchtrk_injet_vhighpt", &m_matchtrk_injet_vhighpt);
   }
+
+  eventTree->Branch("allmatchtrk_pt", &m_allmatchtrk_pt);
+  eventTree->Branch("allmatchtrk_eta", &m_allmatchtrk_eta);
+  eventTree->Branch("allmatchtrk_phi", &m_allmatchtrk_phi);
+  eventTree->Branch("allmatchtrk_z0", &m_allmatchtrk_z0);
+  eventTree->Branch("allmatchtrk_d0", &m_allmatchtrk_d0);
+  eventTree->Branch("allmatchtrk_chi2", &m_allmatchtrk_chi2);
+  eventTree->Branch("allmatchtrk_chi2_dof", &m_allmatchtrk_chi2_dof);
+  eventTree->Branch("allmatchtrk_chi2rphi", &m_allmatchtrk_chi2rphi);
+  eventTree->Branch("allmatchtrk_chi2rphi_dof", &m_allmatchtrk_chi2rphi_dof);
+  eventTree->Branch("allmatchtrk_chi2rz", &m_allmatchtrk_chi2rz);
+  eventTree->Branch("allmatchtrk_chi2rz_dof", &m_allmatchtrk_chi2rz_dof);
+  eventTree->Branch("allmatchtrk_bendchi2", &m_allmatchtrk_bendchi2);
+  eventTree->Branch("allmatchtrk_MVA1", &m_allmatchtrk_MVA1);
+  eventTree->Branch("allmatchtrk_nstub", &m_allmatchtrk_nstub);
+  eventTree->Branch("allmatchtrk_lhits", &m_allmatchtrk_lhits);
+  eventTree->Branch("allmatchtrk_dhits", &m_allmatchtrk_dhits);
+  eventTree->Branch("allmatchtrk_seed", &m_allmatchtrk_seed);
+  eventTree->Branch("allmatchtrk_hitpattern", &m_allmatchtrk_hitpattern);
+  eventTree->Branch("allmatchtrk_charge", &m_allmatchtrk_charge);
+  if (TrackingInJets) {
+    eventTree->Branch("allmatchtrk_injet", &m_allmatchtrk_injet);
+    eventTree->Branch("allmatchtrk_injet_highpt", &m_allmatchtrk_injet_highpt);
+    eventTree->Branch("allmatchtrk_injet_vhighpt", &m_allmatchtrk_injet_vhighpt);
+  }
+
+  eventTree->Branch("nocutallmatchtrk_pt", &m_nocutallmatchtrk_pt);
+  eventTree->Branch("nocutallmatchtrk_eta", &m_nocutallmatchtrk_eta);
+  eventTree->Branch("nocutallmatchtrk_phi", &m_nocutallmatchtrk_phi);
+  eventTree->Branch("nocutallmatchtrk_z0", &m_nocutallmatchtrk_z0);
+  eventTree->Branch("nocutallmatchtrk_d0", &m_nocutallmatchtrk_d0);
+  eventTree->Branch("nocutallmatchtrk_chi2", &m_nocutallmatchtrk_chi2);
+  eventTree->Branch("nocutallmatchtrk_chi2_dof", &m_nocutallmatchtrk_chi2_dof);
+  eventTree->Branch("nocutallmatchtrk_chi2rphi", &m_nocutallmatchtrk_chi2rphi);
+  eventTree->Branch("nocutallmatchtrk_chi2rphi_dof", &m_nocutallmatchtrk_chi2rphi_dof);
+  eventTree->Branch("nocutallmatchtrk_chi2rz", &m_nocutallmatchtrk_chi2rz);
+  eventTree->Branch("nocutallmatchtrk_chi2rz_dof", &m_nocutallmatchtrk_chi2rz_dof);
+  eventTree->Branch("nocutallmatchtrk_bendchi2", &m_nocutallmatchtrk_bendchi2);
+  eventTree->Branch("nocutallmatchtrk_MVA1", &m_nocutallmatchtrk_MVA1);
+  eventTree->Branch("nocutallmatchtrk_nstub", &m_nocutallmatchtrk_nstub);
+  eventTree->Branch("nocutallmatchtrk_lhits", &m_nocutallmatchtrk_lhits);
+  eventTree->Branch("nocutallmatchtrk_dhits", &m_nocutallmatchtrk_dhits);
+  eventTree->Branch("nocutallmatchtrk_seed", &m_nocutallmatchtrk_seed);
+  eventTree->Branch("nocutallmatchtrk_hitpattern", &m_nocutallmatchtrk_hitpattern);
+  eventTree->Branch("nocutallmatchtrk_charge", &m_nocutallmatchtrk_charge);
+  if (TrackingInJets) {
+    eventTree->Branch("nocutallmatchtrk_injet", &m_nocutallmatchtrk_injet);
+    eventTree->Branch("nocutallmatchtrk_injet_highpt", &m_nocutallmatchtrk_injet_highpt);
+    eventTree->Branch("nocutallmatchtrk_injet_vhighpt", &m_nocutallmatchtrk_injet_vhighpt);
+  }
+
+
 
   if (SaveStubs) {
     eventTree->Branch("allstub_x", &m_allstub_x);
@@ -812,6 +1005,54 @@ void L1TrackNtupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup
   m_matchtrk_injet->clear();
   m_matchtrk_injet_highpt->clear();
   m_matchtrk_injet_vhighpt->clear();
+
+
+  m_allmatchtrk_pt->clear();
+  m_allmatchtrk_eta->clear();
+  m_allmatchtrk_phi->clear();
+  m_allmatchtrk_z0->clear();
+  m_allmatchtrk_d0->clear();
+  m_allmatchtrk_chi2->clear();
+  m_allmatchtrk_chi2_dof->clear();
+  m_allmatchtrk_chi2rphi->clear();
+  m_allmatchtrk_chi2rphi_dof->clear();
+  m_allmatchtrk_chi2rz->clear();
+  m_allmatchtrk_chi2rz_dof->clear();
+  m_allmatchtrk_bendchi2->clear();
+  m_allmatchtrk_MVA1->clear();
+  m_allmatchtrk_nstub->clear();
+  m_allmatchtrk_dhits->clear();
+  m_allmatchtrk_lhits->clear();
+  m_allmatchtrk_seed->clear();
+  m_allmatchtrk_hitpattern->clear();
+  m_allmatchtrk_charge->clear();
+  m_allmatchtrk_injet->clear();
+  m_allmatchtrk_injet_highpt->clear();
+  m_allmatchtrk_injet_vhighpt->clear();
+
+
+  m_nocutallmatchtrk_pt->clear();
+  m_nocutallmatchtrk_eta->clear();
+  m_nocutallmatchtrk_phi->clear();
+  m_nocutallmatchtrk_z0->clear();
+  m_nocutallmatchtrk_d0->clear();
+  m_nocutallmatchtrk_chi2->clear();
+  m_nocutallmatchtrk_chi2_dof->clear();
+  m_nocutallmatchtrk_chi2rphi->clear();
+  m_nocutallmatchtrk_chi2rphi_dof->clear();
+  m_nocutallmatchtrk_chi2rz->clear();
+  m_nocutallmatchtrk_chi2rz_dof->clear();
+  m_nocutallmatchtrk_bendchi2->clear();
+  m_nocutallmatchtrk_MVA1->clear();
+  m_nocutallmatchtrk_nstub->clear();
+  m_nocutallmatchtrk_dhits->clear();
+  m_nocutallmatchtrk_lhits->clear();
+  m_nocutallmatchtrk_seed->clear();
+  m_nocutallmatchtrk_hitpattern->clear();
+  m_nocutallmatchtrk_charge->clear();
+  m_nocutallmatchtrk_injet->clear();
+  m_nocutallmatchtrk_injet_highpt->clear();
+  m_nocutallmatchtrk_injet_vhighpt->clear();
 
   if (SaveStubs) {
     m_allstub_x->clear();
@@ -1535,6 +1776,51 @@ void L1TrackNtupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup
     int i_track = -1;
     float i_chi2dof = 99999;
 
+    // int i_alltrack = -1;
+
+    std::vector<float> tmp_allmatchtrk_pt;
+    std::vector<float> tmp_allmatchtrk_eta;
+    std::vector<float> tmp_allmatchtrk_phi;
+    std::vector<float> tmp_allmatchtrk_z0;
+    std::vector<float> tmp_allmatchtrk_d0;
+    std::vector<float> tmp_allmatchtrk_chi2;
+    std::vector<float> tmp_allmatchtrk_chi2_dof;
+    std::vector<float> tmp_allmatchtrk_chi2rphi;
+    std::vector<float> tmp_allmatchtrk_chi2rphi_dof;
+    std::vector<float> tmp_allmatchtrk_chi2rz;
+    std::vector<float> tmp_allmatchtrk_chi2rz_dof;
+    std::vector<float> tmp_allmatchtrk_bendchi2;
+    std::vector<float> tmp_allmatchtrk_MVA1;
+    std::vector<int> tmp_allmatchtrk_charge;
+    std::vector<int> tmp_allmatchtrk_nstub;
+    std::vector<int> tmp_allmatchtrk_dhits;
+    std::vector<int> tmp_allmatchtrk_lhits;
+    std::vector<int> tmp_allmatchtrk_seed;
+    std::vector<int> tmp_allmatchtrk_hitpattern;
+
+
+
+    std::vector<float> tmp_nocutallmatchtrk_pt;
+    std::vector<float> tmp_nocutallmatchtrk_eta;
+    std::vector<float> tmp_nocutallmatchtrk_phi;
+    std::vector<float> tmp_nocutallmatchtrk_z0;
+    std::vector<float> tmp_nocutallmatchtrk_d0;
+    std::vector<float> tmp_nocutallmatchtrk_chi2;
+    std::vector<float> tmp_nocutallmatchtrk_chi2_dof;
+    std::vector<float> tmp_nocutallmatchtrk_chi2rphi;
+    std::vector<float> tmp_nocutallmatchtrk_chi2rphi_dof;
+    std::vector<float> tmp_nocutallmatchtrk_chi2rz;
+    std::vector<float> tmp_nocutallmatchtrk_chi2rz_dof;
+    std::vector<float> tmp_nocutallmatchtrk_bendchi2;
+    std::vector<float> tmp_nocutallmatchtrk_MVA1;
+    std::vector<int> tmp_nocutallmatchtrk_charge;
+    std::vector<int> tmp_nocutallmatchtrk_nstub;
+    std::vector<int> tmp_nocutallmatchtrk_dhits;
+    std::vector<int> tmp_nocutallmatchtrk_lhits;
+    std::vector<int> tmp_nocutallmatchtrk_seed;
+    std::vector<int> tmp_nocutallmatchtrk_hitpattern;
+
+
     if (!matchedTracks.empty()) {
       if (DebugMode && (matchedTracks.size() > 1))
         edm::LogVerbatim("Tracklet") << "TrackingParticle has more than one matched L1 track!";
@@ -1612,9 +1898,111 @@ void L1TrackNtupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup
 
         float tmp_trk_chi2dof = (matchedTracks.at(it)->chi2()) / (2 * tmp_trk_nstub - L1Tk_nPar);
 
+        if (tmp_tp_pdgid == match_id && tmp_trk_genuine){ 
+          tmp_nocutallmatchtrk_pt.push_back(matchedTracks.at(it)->momentum().perp());
+          tmp_nocutallmatchtrk_charge.push_back((int)TMath::Sign(1, matchedTracks.at(it)->rInv()));
+          tmp_nocutallmatchtrk_eta.push_back(matchedTracks.at(it)->momentum().eta());
+          tmp_nocutallmatchtrk_phi.push_back(matchedTracks.at(it)->momentum().phi());
+          tmp_nocutallmatchtrk_z0.push_back(matchedTracks.at(it)->z0());
+          
+          if (L1Tk_nPar == 5) {
+              float tmp_x0 = matchedTracks.at(it)->POCA().x();
+              float tmp_y0 = matchedTracks.at(it)->POCA().y();
+              tmp_nocutallmatchtrk_d0.push_back(tmp_x0 * sin(tmp_nocutallmatchtrk_phi.back()) - tmp_y0 * cos(tmp_nocutallmatchtrk_phi.back()));
+          } else {
+              tmp_nocutallmatchtrk_d0.push_back(-999);
+          }
+          
+          tmp_nocutallmatchtrk_chi2.push_back(matchedTracks.at(it)->chi2());
+          tmp_nocutallmatchtrk_chi2rphi.push_back(matchedTracks.at(it)->chi2XY());
+          tmp_nocutallmatchtrk_chi2rz.push_back(matchedTracks.at(it)->chi2Z());
+          tmp_nocutallmatchtrk_bendchi2.push_back(matchedTracks.at(it)->stubPtConsistency());
+          tmp_nocutallmatchtrk_MVA1.push_back(matchedTracks.at(it)->trkMVA1());
+          tmp_nocutallmatchtrk_nstub.push_back((int)matchedTracks.at(it)->getStubRefs().size());
+          tmp_nocutallmatchtrk_seed.push_back((int)matchedTracks.at(it)->trackSeedType());
+          tmp_nocutallmatchtrk_hitpattern.push_back((int)matchedTracks.at(it)->hitPattern());
+          
+          int ndof = 2 * tmp_nocutallmatchtrk_nstub.back() - L1Tk_nPar;
+          int ndofrphi = tmp_nocutallmatchtrk_nstub.back() - L1Tk_nPar + 2;
+          int ndofrz = tmp_nocutallmatchtrk_nstub.back() - 2;
+          
+          tmp_nocutallmatchtrk_chi2_dof.push_back((float)tmp_nocutallmatchtrk_chi2.back() / ndof);
+          tmp_nocutallmatchtrk_chi2rphi_dof.push_back((float)tmp_nocutallmatchtrk_chi2rphi.back() / ndofrphi);
+          tmp_nocutallmatchtrk_chi2rz_dof.push_back((float)tmp_nocutallmatchtrk_chi2rz.back() / ndofrz);
+          
+          tmp_nocutallmatchtrk_dhits.push_back(0);
+          tmp_nocutallmatchtrk_lhits.push_back(0);
+          
+          // Loop over stubs for dhits and lhits
+          std::vector<edm::Ref<edmNew::DetSetVector<TTStub<Ref_Phase2TrackerDigi_>>, TTStub<Ref_Phase2TrackerDigi_>>> stubRefs =
+              matchedTracks.at(it)->getStubRefs();
+          
+          for (int is = 0; is < (int)stubRefs.size(); is++) {
+              DetId detIdStub = theTrackerGeom->idToDet((stubRefs.at(is)->clusterRef(0))->getDetId())->geographicalId();
+              int layer = -999999;
+              if (detIdStub.subdetId() == StripSubdetector::TOB) {
+                  layer = static_cast<int>(tTopo->layer(detIdStub));
+                  tmp_nocutallmatchtrk_lhits.back() += pow(10, layer - 1);
+              } else if (detIdStub.subdetId() == StripSubdetector::TID) {
+                  layer = static_cast<int>(tTopo->layer(detIdStub));
+                  tmp_nocutallmatchtrk_dhits.back() += pow(10, layer - 1);
+              }
+          } 
+        }
         // ensure that track is uniquely matched to the TP we are looking at!
         if (dmatch_pt < 0.1 && dmatch_eta < 0.1 && dmatch_phi < 0.1 && tmp_tp_pdgid == match_id && tmp_trk_genuine) {
           nMatch++;
+    
+          tmp_allmatchtrk_pt.push_back(matchedTracks.at(it)->momentum().perp());
+          tmp_allmatchtrk_charge.push_back((int)TMath::Sign(1, matchedTracks.at(it)->rInv()));
+          tmp_allmatchtrk_eta.push_back(matchedTracks.at(it)->momentum().eta());
+          tmp_allmatchtrk_phi.push_back(matchedTracks.at(it)->momentum().phi());
+          tmp_allmatchtrk_z0.push_back(matchedTracks.at(it)->z0());
+          
+          if (L1Tk_nPar == 5) {
+              float tmp_x0 = matchedTracks.at(it)->POCA().x();
+              float tmp_y0 = matchedTracks.at(it)->POCA().y();
+              tmp_allmatchtrk_d0.push_back(tmp_x0 * sin(tmp_allmatchtrk_phi.back()) - tmp_y0 * cos(tmp_allmatchtrk_phi.back()));
+          } else {
+              tmp_allmatchtrk_d0.push_back(-999);
+          }
+          
+          tmp_allmatchtrk_chi2.push_back(matchedTracks.at(it)->chi2());
+          tmp_allmatchtrk_chi2rphi.push_back(matchedTracks.at(it)->chi2XY());
+          tmp_allmatchtrk_chi2rz.push_back(matchedTracks.at(it)->chi2Z());
+          tmp_allmatchtrk_bendchi2.push_back(matchedTracks.at(it)->stubPtConsistency());
+          tmp_allmatchtrk_MVA1.push_back(matchedTracks.at(it)->trkMVA1());
+          tmp_allmatchtrk_nstub.push_back((int)matchedTracks.at(it)->getStubRefs().size());
+          tmp_allmatchtrk_seed.push_back((int)matchedTracks.at(it)->trackSeedType());
+          tmp_allmatchtrk_hitpattern.push_back((int)matchedTracks.at(it)->hitPattern());
+          
+          int ndof = 2 * tmp_allmatchtrk_nstub.back() - L1Tk_nPar;
+          int ndofrphi = tmp_allmatchtrk_nstub.back() - L1Tk_nPar + 2;
+          int ndofrz = tmp_allmatchtrk_nstub.back() - 2;
+          
+          tmp_allmatchtrk_chi2_dof.push_back((float)tmp_allmatchtrk_chi2.back() / ndof);
+          tmp_allmatchtrk_chi2rphi_dof.push_back((float)tmp_allmatchtrk_chi2rphi.back() / ndofrphi);
+          tmp_allmatchtrk_chi2rz_dof.push_back((float)tmp_allmatchtrk_chi2rz.back() / ndofrz);
+          
+          tmp_allmatchtrk_dhits.push_back(0);
+          tmp_allmatchtrk_lhits.push_back(0);
+          
+          // Loop over stubs for dhits and lhits
+          std::vector<edm::Ref<edmNew::DetSetVector<TTStub<Ref_Phase2TrackerDigi_>>, TTStub<Ref_Phase2TrackerDigi_>>> stubRefs =
+              matchedTracks.at(it)->getStubRefs();
+          
+          for (int is = 0; is < (int)stubRefs.size(); is++) {
+              DetId detIdStub = theTrackerGeom->idToDet((stubRefs.at(is)->clusterRef(0))->getDetId())->geographicalId();
+              int layer = -999999;
+              if (detIdStub.subdetId() == StripSubdetector::TOB) {
+                  layer = static_cast<int>(tTopo->layer(detIdStub));
+                  tmp_allmatchtrk_lhits.back() += pow(10, layer - 1);
+              } else if (detIdStub.subdetId() == StripSubdetector::TID) {
+                  layer = static_cast<int>(tTopo->layer(detIdStub));
+                  tmp_allmatchtrk_dhits.back() += pow(10, layer - 1);
+              }
+          } 
+
           if (i_track < 0 || tmp_trk_chi2dof < i_chi2dof) {
             i_track = it;
             i_chi2dof = tmp_trk_chi2dof;
@@ -1743,6 +2131,33 @@ void L1TrackNtupleMaker::analyze(const edm::Event& iEvent, const edm::EventSetup
     m_matchtrk_chi2_dof->push_back(tmp_matchtrk_chi2_dof);
     m_matchtrk_chi2rphi_dof->push_back(tmp_matchtrk_chi2rphi_dof);
     m_matchtrk_chi2rz_dof->push_back(tmp_matchtrk_chi2rz_dof);
+
+    m_allmatchtrk_pt->insert(m_allmatchtrk_pt->end(), tmp_allmatchtrk_pt.begin(), tmp_allmatchtrk_pt.end());
+    m_allmatchtrk_eta->insert(m_allmatchtrk_eta->end(), tmp_allmatchtrk_eta.begin(), tmp_allmatchtrk_eta.end());
+    m_allmatchtrk_phi->insert(m_allmatchtrk_phi->end(), tmp_allmatchtrk_phi.begin(), tmp_allmatchtrk_phi.end());
+    m_allmatchtrk_z0->insert(m_allmatchtrk_z0->end(), tmp_allmatchtrk_z0.begin(), tmp_allmatchtrk_z0.end());
+    m_allmatchtrk_d0->insert(m_allmatchtrk_d0->end(), tmp_allmatchtrk_d0.begin(), tmp_allmatchtrk_d0.end());
+    m_allmatchtrk_chi2->insert(m_allmatchtrk_chi2->end(), tmp_allmatchtrk_chi2.begin(), tmp_allmatchtrk_chi2.end());
+    m_allmatchtrk_bendchi2->insert(m_allmatchtrk_bendchi2->end(), tmp_allmatchtrk_bendchi2.begin(), tmp_allmatchtrk_bendchi2.end());
+    m_allmatchtrk_nstub->insert(m_allmatchtrk_nstub->end(), tmp_allmatchtrk_nstub.begin(), tmp_allmatchtrk_nstub.end());
+    m_allmatchtrk_dhits->insert(m_allmatchtrk_dhits->end(), tmp_allmatchtrk_dhits.begin(), tmp_allmatchtrk_dhits.end());
+    m_allmatchtrk_lhits->insert(m_allmatchtrk_lhits->end(), tmp_allmatchtrk_lhits.begin(), tmp_allmatchtrk_lhits.end());
+    m_allmatchtrk_seed->insert(m_allmatchtrk_seed->end(), tmp_allmatchtrk_seed.begin(), tmp_allmatchtrk_seed.end());
+    m_allmatchtrk_hitpattern->insert(m_allmatchtrk_hitpattern->end(), tmp_allmatchtrk_hitpattern.begin(), tmp_allmatchtrk_hitpattern.end());
+
+
+    m_nocutallmatchtrk_pt->insert(m_nocutallmatchtrk_pt->end(), tmp_nocutallmatchtrk_pt.begin(), tmp_nocutallmatchtrk_pt.end());
+    m_nocutallmatchtrk_eta->insert(m_nocutallmatchtrk_eta->end(), tmp_nocutallmatchtrk_eta.begin(), tmp_nocutallmatchtrk_eta.end());
+    m_nocutallmatchtrk_phi->insert(m_nocutallmatchtrk_phi->end(), tmp_nocutallmatchtrk_phi.begin(), tmp_nocutallmatchtrk_phi.end());
+    m_nocutallmatchtrk_z0->insert(m_nocutallmatchtrk_z0->end(), tmp_nocutallmatchtrk_z0.begin(), tmp_nocutallmatchtrk_z0.end());
+    m_nocutallmatchtrk_d0->insert(m_nocutallmatchtrk_d0->end(), tmp_nocutallmatchtrk_d0.begin(), tmp_nocutallmatchtrk_d0.end());
+    m_nocutallmatchtrk_chi2->insert(m_nocutallmatchtrk_chi2->end(), tmp_nocutallmatchtrk_chi2.begin(), tmp_nocutallmatchtrk_chi2.end());
+    m_nocutallmatchtrk_bendchi2->insert(m_nocutallmatchtrk_bendchi2->end(), tmp_nocutallmatchtrk_bendchi2.begin(), tmp_nocutallmatchtrk_bendchi2.end());
+    m_nocutallmatchtrk_nstub->insert(m_nocutallmatchtrk_nstub->end(), tmp_nocutallmatchtrk_nstub.begin(), tmp_nocutallmatchtrk_nstub.end());
+    m_nocutallmatchtrk_dhits->insert(m_nocutallmatchtrk_dhits->end(), tmp_nocutallmatchtrk_dhits.begin(), tmp_nocutallmatchtrk_dhits.end());
+    m_nocutallmatchtrk_lhits->insert(m_nocutallmatchtrk_lhits->end(), tmp_nocutallmatchtrk_lhits.begin(), tmp_nocutallmatchtrk_lhits.end());
+    m_nocutallmatchtrk_seed->insert(m_nocutallmatchtrk_seed->end(), tmp_nocutallmatchtrk_seed.begin(), tmp_nocutallmatchtrk_seed.end());
+    m_nocutallmatchtrk_hitpattern->insert(m_nocutallmatchtrk_hitpattern->end(), tmp_nocutallmatchtrk_hitpattern.begin(), tmp_nocutallmatchtrk_hitpattern.end());
 
     // ----------------------------------------------------------------------------------------------
     // for tracking in jets

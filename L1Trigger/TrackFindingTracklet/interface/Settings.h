@@ -1015,14 +1015,14 @@ namespace trklet {
 
 #ifdef USEHYBRID
     // Duplicate track removal algo. VALUE HERE OVERRIDDEN BY PYTHON CFG
-    std::string removalType_{"merge"};
+    std::string removalType_{""};
     // "CompareBest" (recommended) Compares only the best stub in each track for each region (best = smallest phi residual)
     // and will merge the two tracks if stubs are shared in three or more regions
     // "CompareAll" Compares all stubs in a region, looking for matches, and will merge the two tracks if stubs are shared in three or more regions
     std::string mergeComparison_{"CompareBest"};
     bool doKF_{true};
 #else
-    std::string removalType_{"ichi"};
+    std::string removalType_{""};
     std::string mergeComparison_{""};
     bool doKF_{false};
 #endif
@@ -1042,7 +1042,7 @@ namespace trklet {
 
     // NEXT 3 VALUES OVERRIDDEN BY PYTHON CFG
     unsigned int nHelixPar_{4};  // 4 or 5 param helix fit
-    bool extended_{false};       // turn on displaced tracking
+    bool extended_{true};       // turn on displaced tracking
     bool reduced_{false};        // use reduced (Summer Chain) config
     bool inventStubs_{false};    // invent seeding stub coordinates based on tracklet traj
 
