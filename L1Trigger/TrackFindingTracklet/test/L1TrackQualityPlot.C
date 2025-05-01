@@ -29,6 +29,7 @@
 #include "TGraphErrors.h"
 #include "TGraphPainter.h"
 #include "TSystem.h"
+#include "TMultiGraph.h"  
 
 #include <iostream>
 #include <string>
@@ -38,6 +39,76 @@
 
 using namespace std;
 
+void drawPerfVsX(const std::vector<TGraphErrors*>& graphs,
+  const TString& canvasName,
+  const TString& canvasTitle,
+  const TString& xAxisTitle,
+  const TString& yAxisTitle,
+  const TString& saveDir,
+  const TString& savePrefix,
+  const TString& fileSuffix = "pdf",
+  int startSeed = 8,
+  std::map<int, TString> seedLabels = {}) {
+
+// Create subdirectory
+TString subDir = saveDir + "/plots";
+gSystem->mkdir(subDir, kTRUE);
+
+TCanvas* canvas = new TCanvas(canvasName, canvasTitle, 800, 600);
+canvas->SetGrid();
+
+int colors[] = {kRed, kBlue, kGreen, kMagenta, kOrange, kCyan, kYellow, kPink, kRed, kBlue, kGreen, kOrange};
+
+bool firstDrawn = false;
+
+double maxY = 0.0;
+for (int seed = startSeed; seed < (int)graphs.size(); ++seed) {
+if (!graphs[seed]) continue;
+for (int i = 0; i < graphs[seed]->GetN(); ++i) {
+double y = graphs[seed]->GetY()[i];
+if (y > maxY) maxY = y;
+}
+}
+
+for (int seed = startSeed; seed < (int)graphs.size(); ++seed) {
+if (!graphs[seed]) continue;
+
+int colorIndex = seed - startSeed;
+graphs[seed]->SetLineColor(colors[colorIndex % (sizeof(colors)/sizeof(int))]);
+graphs[seed]->SetMarkerColor(colors[colorIndex % (sizeof(colors)/sizeof(int))]);
+graphs[seed]->SetMarkerStyle(20);
+graphs[seed]->SetLineWidth(2);
+graphs[seed]->SetLineStyle((seed < 7) ? 1 : 2);
+
+if (!firstDrawn) {
+graphs[seed]->SetTitle(canvasTitle);
+graphs[seed]->GetXaxis()->SetTitle(xAxisTitle);
+graphs[seed]->GetYaxis()->SetTitle(yAxisTitle);
+graphs[seed]->SetMinimum(0.0); 
+graphs[seed]->SetMaximum(maxY * 1.1);
+graphs[seed]->Draw("AP");
+firstDrawn = true;
+} else {
+graphs[seed]->Draw("P SAME");
+}
+}
+
+TLegend* legend = new TLegend(); // Custom legend placement
+for (int seed = startSeed; seed < (int)graphs.size(); ++seed) {
+if (graphs[seed]) {
+TString label = seedLabels.count(seed) ? seedLabels[seed] : Form("Seed %d", seed);
+legend->AddEntry(graphs[seed], label, "lp");
+}
+}
+legend->Draw();
+
+// Save canvas
+TString outFileBase = Form("%s/%s_%s", subDir.Data(), savePrefix.Data(), canvasName.Data());
+canvas->SaveAs(outFileBase + ".pdf");
+canvas->SaveAs(outFileBase + ".png");
+
+delete canvas;
+}
 void SetPlotStyle();
 
 // ----------------------------------------------------------------------------------------------------------------
@@ -93,6 +164,9 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
   vector<int>* trk_loose;
   vector<float>* trk_MVA1;
   vector<float>* trk_matchtp_pdgid;
+  vector<float>* trk_d0;
+  vector<float>* trk_z0;
+
 
   TBranch* b_trk_pt;
   TBranch* b_trk_eta;
@@ -111,6 +185,9 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
   TBranch* b_trk_loose;
   TBranch* b_trk_MVA1;
   TBranch* b_trk_matchtp_pdgid;
+  TBranch* b_trk_d0;
+  TBranch* b_trk_z0;
+
 
   trk_pt = 0;
   trk_eta = 0;
@@ -129,6 +206,9 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
   trk_loose = 0;
   trk_MVA1 = 0;
   trk_matchtp_pdgid = 0;
+  trk_d0 = 0;
+  trk_z0 = 0;
+
 
   tree->SetBranchAddress("trk_pt", &trk_pt, &b_trk_pt);
   tree->SetBranchAddress("trk_eta", &trk_eta, &b_trk_eta);
@@ -147,11 +227,14 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
   tree->SetBranchAddress("trk_loose", &trk_loose, &b_trk_loose);
   tree->SetBranchAddress("trk_MVA1", &trk_MVA1, &b_trk_MVA1);
   tree->SetBranchAddress("trk_matchtp_pdgid", &trk_matchtp_pdgid, &b_trk_matchtp_pdgid);
+  tree->SetBranchAddress("trk_d0", &trk_d0, &b_trk_d0);
+  tree->SetBranchAddress("trk_z0", &trk_z0, &b_trk_z0);
 
   // ----------------------------------------------------------------------------------------------------------------
   // histograms
   // ----------------------------------------------------------------------------------------------------------------
 
+  int seedNum = 12;
   TH1F* h_trk_MVA1 = new TH1F("trk_MVA1", "; MVA1; L1 tracks", 50, 0, 1);
 
   TH1F* h_trk_MVA1_real = new TH1F("trk_MVA1_real", ";MVA1; L1 tracks", 50, 0, 1);
@@ -159,6 +242,18 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
   TH1F* h_trk_MVA1_fake = new TH1F("trk_MVA1_fake", ";MVA1; L1 tracks", 50, 0, 1);
   h_trk_MVA1_fake->SetLineColor(4);
 
+
+  std::vector<TH1F*> h_trk_MVA1_seed(seedNum);
+  std::vector<TH1F*> h_trk_MVA1_seed_real(seedNum);
+  std::vector<TH1F*> h_trk_MVA1_seed_fake(seedNum);
+
+  for (int seed = 0; seed < seedNum; seed++) {
+    h_trk_MVA1_seed[seed] = new TH1F(Form("trk_MVA1_seed_%d", seed), Form("; MVA1; L1 tracks (seed %d)", seed), 50, 0, 1);
+    h_trk_MVA1_seed_real[seed] = new TH1F(Form("trk_MVA1_seed_real_%d", seed), Form(";MVA1; L1 tracks (seed %d)", seed), 50, 0, 1);
+    h_trk_MVA1_seed_fake[seed] = new TH1F(Form("trk_MVA1_seed_fake_%d", seed), Form(";MVA1; L1 tracks (seed %d)", seed), 50, 0, 1);
+    h_trk_MVA1_seed_real[seed]->SetLineColor(3);
+    h_trk_MVA1_seed_fake[seed]->SetLineColor(4);
+  }
   // ----------------------------------------------------------------------------------------------------------------
   //        * * * * *     S T A R T   O F   A C T U A L   R U N N I N G   O N   E V E N T S     * * * * *
   // ----------------------------------------------------------------------------------------------------------------
@@ -173,6 +268,18 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
   vector<float> etas;
   vector<float> pts;
   vector<int> pdgids;
+
+
+std::vector<std::vector<float>> MVA1s_seed(seedNum);
+  std::vector<std::vector<float>> fakes_seed(seedNum);
+  std::vector<std::vector<float>> etas_seed(seedNum);
+  std::vector<std::vector<float>> pts_seed(seedNum);
+  std::vector<std::vector<int>> pdgids_seed(seedNum);
+
+
+  std::vector<std::vector<float>> d0s_seed(seedNum);
+  std::vector<std::vector<float>> z0s_seed(seedNum);
+
   for (int i = 0; i < nevt; i++) {
     tree->GetEntry(i, 0);
 
@@ -198,6 +305,40 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
       else if (fake == 0.)
         h_trk_MVA1_fake->Fill(MVA1);
     }
+
+
+    for (int seed = 0; seed < seedNum; seed++) {
+      for (int it = 0; it < (int)trk_pt->size(); it++) {
+        // ----------------------------------------------------------------------------------------------------------------
+        // track properties per seed
+
+        if (trk_seed->at(it) != seed)
+          continue;
+        float MVA1_seed = trk_MVA1->at(it);
+        float fake_seed = trk_fake->at(it);
+        float eta_seed = trk_eta->at(it);
+        float pt_seed = trk_pt->at(it);
+        float pdgid_seed = trk_matchtp_pdgid->at(it);
+        float d0_seed = trk_d0->at(it);
+        float z0_seed = trk_z0->at(it);
+
+
+        MVA1s_seed[seed].push_back(MVA1_seed);
+        fakes_seed[seed].push_back(fake_seed);
+        etas_seed[seed].push_back(eta_seed);
+        pts_seed[seed].push_back(pt_seed);
+        pdgids_seed[seed].push_back(pdgid_seed);
+        d0s_seed[seed].push_back(d0_seed);
+        z0s_seed[seed].push_back(z0_seed);
+
+        h_trk_MVA1_seed[seed]->Fill(MVA1_seed);
+        if (fake_seed == 1.)
+          h_trk_MVA1_seed_real[seed]->Fill(MVA1_seed);
+        else if (fake_seed == 0.)
+          h_trk_MVA1_seed_fake[seed]->Fill(MVA1_seed);
+  }
+
+}
   }
 
   // -------------------------------------------------------------------------------------------
@@ -211,6 +352,17 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
   vector<float> TPR, TPR_mu, TPR_el, TPR_had;
   vector<float> FPR;
   vector<float> dec_thresh;
+
+
+  std::vector<std::vector<float>> TPR_seed(seedNum);
+  std::vector<std::vector<float>> FPR_seed(seedNum);
+  std::vector<std::vector<float>> dec_thresh_seed(seedNum);
+  vector<float> TP_seed (seedNum); // True Positives
+  vector<float> FP_seed (seedNum); // False Positives
+  vector<float> P_seed (seedNum); // Total Positives
+  vector<float> N_seed (seedNum); // Total Negatives
+
+
   int n = 100;  //num of entries on ROC curve
   for (int i = 0; i < n; i++) {
     float dt = (float)i / (n - 1);                   //make sure it starts at (0,0) and ends at (1,1)
@@ -218,6 +370,32 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
     float FP = 0;                                    //False Positives
     float P = 0, P_mu = 0, P_el = 0, P_had = 0;      //Total Positives
     float N = 0;                                     //Total Negatives
+
+    for (int seed = 0; seed < seedNum; seed++) {
+      TP_seed[seed] = 0;
+      FP_seed[seed] = 0;
+      P_seed[seed] = 0;
+      N_seed[seed] = 0;
+
+
+      for (int k = 0; k < (int)MVA1s_seed[seed].size(); k++) {
+        if (fakes_seed[seed].at(k)) {
+          P_seed[seed]++;
+          if (MVA1s_seed[seed].at(k) > dt)
+            TP_seed[seed]++;
+
+        } else {
+          N_seed[seed]++;
+          if (MVA1s_seed[seed].at(k) > dt)
+            FP_seed[seed]++;
+        }
+      }
+
+
+      TPR_seed[seed].push_back((float)TP_seed[seed] / P_seed[seed]);
+      FPR_seed[seed].push_back((float)FP_seed[seed] / N_seed[seed]);
+      dec_thresh_seed[seed].push_back(dt);
+    }
     for (int k = 0; k < (int)MVA1s.size(); k++) {
       if (fakes.at(k)) {
         P++;
@@ -317,12 +495,97 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
   vector<float> TPR_eta_err, TPR_eta_err_mu, TPR_eta_err_el, TPR_eta_err_had;
   vector<float> FPR_eta, FPR_eta_err;
   vector<float> eta_range, eta_range_err;
+
+
+  std::vector<vector<float>> TPR_eta_seed(seedNum);
+  std::vector<vector<float>> TPR_eta_err_seed(seedNum);
+  std::vector<vector<float>> FPR_eta_seed(seedNum);
+  std::vector<vector<float>> FPR_eta_err_seed(seedNum);
+  std::vector<vector<float>> eta_range_seed(seedNum);
+  std::vector<vector<float>> eta_range_err_seed(seedNum);
+  std::vector<TGraphErrors*> TPR_vs_eta_seed(seedNum);
+  std::vector<TGraphErrors*> FPR_vs_eta_seed(seedNum);
+
   n = 20;
   float eta_low = -2.4;
   float eta_high = 2.4;
   float eta_temp = eta_low;
   float eta_step = (eta_high - eta_low) / n;
   float dt = .5;
+
+for (int seed=0; seed < seedNum; seed++) {
+  eta_temp = eta_low;
+
+  for (int ct = 0; ct < n; ct++) {
+
+float TP = 0;
+
+float FP = 0;
+
+float P = 0;
+float N = 0;
+
+    for (int k = 0; k < (int)etas_seed[seed].size(); k++) {
+
+  
+
+
+      if (etas_seed[seed].at(k) > eta_temp && etas_seed[seed].at(k) <= (eta_temp + eta_step)) {
+        if (fakes_seed[seed].at(k)) {
+          P++;
+          if (MVA1s_seed[seed].at(k) > dt)
+            TP++;
+        } else {
+          N++;
+          if (MVA1s_seed[seed].at(k) > dt)
+            FP++;
+        }
+      }
+    }
+
+    if (P == 0)
+    continue;
+
+    if (N == 0)
+    continue;
+
+    //use min function to return 0 if no data filled
+    TPR_eta_seed[seed].push_back(min(TP / P, P));
+    TPR_eta_err_seed[seed].push_back(min((float)sqrt(TP * (P - TP) / pow(P, 3)), P));
+
+    FPR_eta_seed[seed].push_back(min(FP / N, N));
+    FPR_eta_err_seed[seed].push_back(min((float)sqrt(FP * (N - FP) / pow(N, 3)), N));
+
+    //fill eta range
+    eta_range_seed[seed].push_back(eta_temp + eta_step / 2);
+    eta_range_err_seed[seed].push_back(eta_step / 2);
+
+    eta_temp += eta_step;
+
+  }
+   TPR_vs_eta_seed[seed] =
+        new TGraphErrors(n, eta_range_seed[seed].data(), TPR_eta_seed[seed].data(), eta_range_err_seed[seed].data(),
+                         TPR_eta_err_seed[seed].data());
+
+                         TPR_vs_eta_seed[seed]->SetName(Form("TPR_vs_eta_seed_%d", seed));
+  TPR_vs_eta_seed[seed]->SetTitle(Form("TPR vs. #eta (seed %d); #eta; TPR", seed));
+
+
+  FPR_vs_eta_seed[seed] =
+        new TGraphErrors(n, eta_range_seed[seed].data(), FPR_eta_seed[seed].data(), eta_range_err_seed[seed].data(),
+                         FPR_eta_err_seed[seed].data());  
+                         
+  FPR_vs_eta_seed[seed]->SetName(Form("FPR_vs_eta_seed_%d", seed));
+
+  FPR_vs_eta_seed[seed]->SetTitle(Form("FPR vs. #eta (seed %d); #eta; FPR", seed));
+
+
+  }
+
+
+
+
+  eta_temp = eta_low; // Reset before filling overall eta bins
   for (int ct = 0; ct < n; ct++) {
     float TP = 0, TP_mu = 0, TP_el = 0, TP_had = 0;
     float FP = 0;
@@ -408,12 +671,109 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
   vector<float> TPR_pt_err, TPR_pt_err_mu, TPR_pt_err_el, TPR_pt_err_had;
   vector<float> FPR_pt, FPR_pt_err;
   vector<float> pt_range, pt_range_err;
+
+std::vector<vector<float>> TPR_pt_seed(seedNum);
+  std::vector<vector<float>> TPR_pt_err_seed(seedNum);
+  std::vector<vector<float>> FPR_pt_seed(seedNum);
+  std::vector<vector<float>> FPR_pt_err_seed(seedNum);
+  std::vector<vector<float>> pt_range_seed(seedNum);
+  std::vector<vector<float>> pt_range_err_seed(seedNum);
+
+std::vector<vector<float>> TPR_d0_seed(seedNum);
+  std::vector<vector<float>> TPR_d0_err_seed(seedNum);
+  std::vector<vector<float>> FPR_d0_seed(seedNum);
+  std::vector<vector<float>> FPR_d0_err_seed(seedNum);
+  std::vector<vector<float>> d0_range_seed(seedNum);
+  std::vector<vector<float>> d0_range_err_seed(seedNum);
+
+  std::vector<vector<float>> TPR_z0_seed(seedNum);
+  std::vector<vector<float>> TPR_z0_err_seed(seedNum);
+  std::vector<vector<float>> FPR_z0_seed(seedNum);
+  std::vector<vector<float>> FPR_z0_err_seed(seedNum);
+  std::vector<vector<float>> z0_range_seed(seedNum);
+  std::vector<vector<float>> z0_range_err_seed(seedNum);
+
+
+std::vector<TGraphErrors*> TPR_vs_pt_seed(seedNum);
+std::vector<TGraphErrors*> FPR_vs_pt_seed(seedNum);
+
+std::vector<TGraphErrors*> TPR_vs_d0_seed(seedNum);
+std::vector<TGraphErrors*> FPR_vs_d0_seed(seedNum);
+std::vector<TGraphErrors*> TPR_vs_z0_seed(seedNum);
+std::vector<TGraphErrors*> FPR_vs_z0_seed(seedNum);
+
   n = 10;
   float logpt_low = log10(2);     //set low pt in log
   float logpt_high = log10(100);  //set high pt in log
   float logpt_temp = logpt_low;
   float logpt_step = (logpt_high - logpt_low) / n;
+
+
+
   dt = .5;
+
+
+  for (int seed = 0; seed < seedNum; seed++){
+    logpt_temp = logpt_low;
+    for (int ct = 0; ct < n; ct++) {
+
+float TP=0;
+float FP=0;
+float P=0;
+float N=0;
+
+      for (int k = 0; k < (int)pts_seed[seed].size(); k++) {
+
+       
+        if (pts_seed[seed].at(k) > pow(10, logpt_temp) && pts_seed[seed].at(k) <= (pow(10, logpt_temp + logpt_step))) {
+          if (fakes_seed[seed].at(k)) {
+            P++;
+            if (MVA1s_seed[seed].at(k) > dt)
+              TP++;
+          } else {
+            N++;
+            if (MVA1s_seed[seed].at(k) > dt)
+              FP++;
+          }
+        }
+      }
+ 
+      if (P == 0)
+      continue;
+
+      if (N == 0)
+      continue;
+
+      //use min function to return 0 if no data filled
+      TPR_pt_seed[seed].push_back(min(TP / P, P));
+      TPR_pt_err_seed[seed].push_back(min((float)sqrt(TP * (P - TP) / pow(P, 3)), P));
+
+      FPR_pt_seed[seed].push_back(min(FP / N, N));
+      FPR_pt_err_seed[seed].push_back(min((float)sqrt(FP * (N - FP) / pow(N, 3)), N));
+
+      //fill pt range
+      pt_range_seed[seed].push_back((pow(10, logpt_temp) + pow(10, logpt_temp + logpt_step)) / 2);  //halfway in bin
+      pt_range_err_seed[seed].push_back((pow(10, logpt_temp + logpt_step) - pow(10, logpt_temp)) / 2);
+
+      logpt_temp += logpt_step;
+
+
+    }
+      TPR_vs_pt_seed[seed] =
+          new TGraphErrors(n, pt_range_seed[seed].data(), TPR_pt_seed[seed].data(), pt_range_err_seed[seed].data(),
+                           TPR_pt_err_seed[seed].data());
+      TPR_vs_pt_seed[seed]->SetName(Form("TPR_vs_pt_seed_%d", seed));
+      TPR_vs_pt_seed[seed]->SetTitle(Form("TPR vs. p_{T} (seed %d); p_{T}; TPR", seed));
+      FPR_vs_pt_seed[seed] =
+          new TGraphErrors(n, pt_range_seed[seed].data(), FPR_pt_seed[seed].data(), pt_range_err_seed[seed].data(),
+                           FPR_pt_err_seed[seed].data());
+      FPR_vs_pt_seed[seed]->SetName(Form("FPR_vs_pt_seed_%d", seed));
+      FPR_vs_pt_seed[seed]->SetTitle(Form("FPR vs. p_{T} (seed %d); p_{T}; FPR", seed));
+
+    }
+
+
+  logpt_temp = logpt_low;
   for (int ct = 0; ct < n; ct++) {
     float TP = 0, TP_mu = 0, TP_el = 0, TP_had = 0;
     float FP = 0;
@@ -489,6 +849,129 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
   TPR_vs_pt_had->SetName("TPR_vs_pt_had");
   TPR_vs_pt_had->SetTitle("TPR vs. p_{T} (hadrons); p_{T}; TPR");
 
+
+// |d0| and |z0| binning setup
+int d0_nbins = 10;
+int z0_nbins = 15;
+float d0_min = 0.0, d0_max = 10.0;
+float z0_min = 0.0, z0_max = 15.0;
+float d0_step = (d0_max - d0_min) / d0_nbins;
+float z0_step = (z0_max - z0_min) / z0_nbins;
+
+for (int seed = 0; seed < seedNum; seed++) {
+  float d0_temp = d0_min;
+  for (int ct = 0; ct < d0_nbins; ct++) {
+    float TP = 0, FP = 0, P = 0, N = 0;
+
+    for (int k = 0; k < (int)d0s_seed[seed].size(); k++) {
+      float d0 = fabs(d0s_seed[seed][k]); // use absolute value
+
+      if (d0 >= d0_temp && d0 < d0_temp + d0_step) {
+        if (fakes_seed[seed][k]) {
+          P++;
+          if (MVA1s_seed[seed][k] > dt) TP++;
+        } else {
+          N++;
+          if (MVA1s_seed[seed][k] > dt) FP++;
+        }
+      }
+    }
+
+    if (P == 0 || N == 0) continue;
+
+    TPR_d0_seed[seed].push_back(min(TP / P, P));
+    TPR_d0_err_seed[seed].push_back(min((float)sqrt(TP * (P - TP) / pow(P, 3)), P));
+
+    FPR_d0_seed[seed].push_back(min(FP / N, N));
+    FPR_d0_err_seed[seed].push_back(min((float)sqrt(FP * (N - FP) / pow(N, 3)), N));
+
+    d0_range_seed[seed].push_back(d0_temp + d0_step / 2);
+    d0_range_err_seed[seed].push_back(d0_step / 2);
+
+    d0_temp += d0_step;
+  }
+
+  TPR_vs_d0_seed[seed] = new TGraphErrors(
+    TPR_d0_seed[seed].size(), d0_range_seed[seed].data(), TPR_d0_seed[seed].data(),
+    d0_range_err_seed[seed].data(), TPR_d0_err_seed[seed].data());
+  TPR_vs_d0_seed[seed]->SetName(Form("TPR_vs_absd0_seed_%d", seed));
+  TPR_vs_d0_seed[seed]->SetTitle(Form("TPR vs. |d_{0}| (seed %d); |d_{0}| [cm]; TPR", seed));
+
+  FPR_vs_d0_seed[seed] = new TGraphErrors(
+    FPR_d0_seed[seed].size(), d0_range_seed[seed].data(), FPR_d0_seed[seed].data(),
+    d0_range_err_seed[seed].data(), FPR_d0_err_seed[seed].data());
+  FPR_vs_d0_seed[seed]->SetName(Form("FPR_vs_absd0_seed_%d", seed));
+  FPR_vs_d0_seed[seed]->SetTitle(Form("FPR vs. |d_{0}| (seed %d); |d_{0}| [cm]; FPR", seed));
+}
+
+// --- Now for |z0|
+for (int seed = 0; seed < seedNum; seed++) {
+  float z0_temp = z0_min;
+  for (int ct = 0; ct < z0_nbins; ct++) {
+    float TP = 0, FP = 0, P = 0, N = 0;
+
+    for (int k = 0; k < (int)z0s_seed[seed].size(); k++) {
+      float z0 = fabs(z0s_seed[seed][k]); // use absolute value
+
+      if (z0 >= z0_temp && z0 < z0_temp + z0_step) {
+        if (fakes_seed[seed][k]) {
+          P++;
+          if (MVA1s_seed[seed][k] > dt) TP++;
+        } else {
+          N++;
+          if (MVA1s_seed[seed][k] > dt) FP++;
+        }
+      }
+    }
+
+    if (P == 0 || N == 0) continue;
+
+    TPR_z0_seed[seed].push_back(min(TP / P, P));
+    TPR_z0_err_seed[seed].push_back(min((float)sqrt(TP * (P - TP) / pow(P, 3)), P));
+
+    FPR_z0_seed[seed].push_back(min(FP / N, N));
+    FPR_z0_err_seed[seed].push_back(min((float)sqrt(FP * (N - FP) / pow(N, 3)), N));
+
+    z0_range_seed[seed].push_back(z0_temp + z0_step / 2);
+    z0_range_err_seed[seed].push_back(z0_step / 2);
+
+    z0_temp += z0_step;
+  }
+
+  TPR_vs_z0_seed[seed] = new TGraphErrors(
+    TPR_z0_seed[seed].size(), z0_range_seed[seed].data(), TPR_z0_seed[seed].data(),
+    z0_range_err_seed[seed].data(), TPR_z0_err_seed[seed].data());
+  TPR_vs_z0_seed[seed]->SetName(Form("TPR_vs_absz0_seed_%d", seed));
+  TPR_vs_z0_seed[seed]->SetTitle(Form("TPR vs. |z_{0}| (seed %d); |z_{0}| [cm]; TPR", seed));
+
+  FPR_vs_z0_seed[seed] = new TGraphErrors(
+    FPR_z0_seed[seed].size(), z0_range_seed[seed].data(), FPR_z0_seed[seed].data(),
+    z0_range_err_seed[seed].data(), FPR_z0_err_seed[seed].data());
+  FPR_vs_z0_seed[seed]->SetName(Form("FPR_vs_absz0_seed_%d", seed));
+  FPR_vs_z0_seed[seed]->SetTitle(Form("FPR vs. |z_{0}| (seed %d); |z_{0}| [cm]; FPR", seed));
+}
+ 
+  std::map<int, TString> seedLabels = {
+    {8, "L2L3L4"},
+    {9, "L4L5L6"},
+    {10, "L2L3D1"},
+    {11, "L2D1D2"}
+  };
+
+  for (int seed = 8; seed < seedNum; ++seed) {
+    std::cout << "Seed " << seed << " has " 
+              << TPR_vs_eta_seed[seed]->GetN() << " points in TPR_vs_eta" << std::endl;
+  }
+drawPerfVsX(TPR_vs_eta_seed, "TPR_vs_eta", "TPR vs. #eta", "#eta", "TPR", "MVA_plots", "perf", "pdf", 8, seedLabels);
+drawPerfVsX(FPR_vs_pt_seed, "FPR_vs_pt", "FPR vs. p_{T}", "p_{T} [GeV]", "FPR", "MVA_plots", "perf", "pdf", 8, seedLabels);
+drawPerfVsX(FPR_vs_pt_seed, "FPR_vs_eta", "FPR vs. #eta", "#eta", "FPR", "MVA_plots", "perf", "pdf", 8, seedLabels);
+drawPerfVsX(TPR_vs_pt_seed, "TPR_vs_pt", "TPR vs. p_{T}", "p_{T} [GeV]", "TPR", "MVA_plots", "perf", "pdf", 8, seedLabels);
+
+
+drawPerfVsX(TPR_vs_d0_seed, "TPR_vs_absd0", "TPR vs. |d_{0}|", "|d_{0}| [cm]", "TPR", "MVA_plots", "perf", "pdf", 8, seedLabels);
+drawPerfVsX(FPR_vs_d0_seed, "FPR_vs_absd0", "FPR vs. |d_{0}|", "|d_{0}| [cm]", "FPR", "MVA_plots", "perf", "pdf", 8, seedLabels);
+drawPerfVsX(TPR_vs_z0_seed, "TPR_vs_absz0", "TPR vs. |z_{0}|", "|z_{0}| [cm]", "TPR", "MVA_plots", "perf", "pdf", 8, seedLabels);
+drawPerfVsX(FPR_vs_z0_seed, "FPR_vs_absz0", "FPR vs. |z_{0}|", "|z_{0}| [cm]", "FPR", "MVA_plots", "perf", "pdf", 8, seedLabels);
   // -------------------------------------------------------------------------------------------
   // output file for histograms and graphs
   // -------------------------------------------------------------------------------------------
@@ -499,6 +982,47 @@ void L1TrackQualityPlot(TString type, TString type_dir = "", TString treeName = 
   // -------------------------------------------------------------------------------------------
   // draw and save plots
   // -------------------------------------------------------------------------------------------
+
+for (int seed = 0; seed < seedNum; seed++){
+
+h_trk_MVA1_seed[seed]->Draw();
+  h_trk_MVA1_seed[seed]->Write();
+  c.SaveAs(Form("MVA_plots/trk_MVA_seed_%d.pdf", seed));
+
+  h_trk_MVA1_seed_real[seed]->Draw();
+  h_trk_MVA1_seed_fake[seed]->Draw("same");
+  h_trk_MVA1_seed_fake[seed]->SetTitle("Performance vs. decision threshold; decision thresh.; performance measure");
+  TLegend* leg = new TLegend();
+  leg->AddEntry(h_trk_MVA1_seed_real[seed], "real", "l");
+  leg->AddEntry(h_trk_MVA1_seed_fake[seed], "fake", "l");
+  leg->Draw("same");
+  c.Write(Form("trk_MVA_rf_seed_%d", seed));
+  c.SaveAs(Form("MVA_plots/trk_MVA_rf_seed_%d.pdf", seed));
+  c.Clear();
+
+
+
+  TPR_vs_eta_seed[seed]->Draw("ap");
+  TPR_vs_eta_seed[seed]->Write();
+  c.SaveAs(Form("MVA_plots/TPR_vs_eta_seed_%d.pdf", seed));
+  c.Clear();
+
+  TPR_vs_pt_seed[seed]->Draw("ap");
+  TPR_vs_pt_seed[seed]->Write();
+  c.SaveAs(Form("MVA_plots/TPR_vs_pt_seed_%d.pdf", seed));
+  c.Clear();
+
+  FPR_vs_eta_seed[seed]->Draw("ap");
+  FPR_vs_eta_seed[seed]->Write();
+  c.SaveAs(Form("MVA_plots/FPR_vs_eta_seed_%d.pdf", seed));
+  c.Clear();
+
+  FPR_vs_pt_seed[seed]->Draw("ap");
+  FPR_vs_pt_seed[seed]->Write();
+  c.SaveAs(Form("MVA_plots/FPR_vs_pt_seed_%d.pdf", seed));
+  c.Clear();
+
+}
 
   h_trk_MVA1->Draw();
   h_trk_MVA1->Write();

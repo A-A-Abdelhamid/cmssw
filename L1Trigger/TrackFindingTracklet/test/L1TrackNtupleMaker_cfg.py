@@ -16,14 +16,14 @@ process = cms.Process("L1TrackNtuple")
 
 # D88 was used for CMSSW_12_6 datasets, and D98 recommended for more recent ones.
 #GEOMETRY = "D88"
-GEOMETRY = "D98"
+GEOMETRY = "D110"
 
 # Set L1 tracking algorithm:
 # 'HYBRID' (baseline, 4par fit) or 'HYBRID_DISPLACED' (extended, 5par fit).
 # 'HYBRID_NEWKF' (baseline, 4par fit, with bit-accurate KF emulation),
 # 'HYBRID_REDUCED' to use the "Summer Chain" configuration with reduced inputs.
 # (Or legacy algos 'TMTT' or 'TRACKLET').
-L1TRKALGO = 'HYBRID'
+L1TRKALGO = 'HYBRID_DISPLACED'
 
 WRITE_DATA = False
 
@@ -40,7 +40,7 @@ process.MessageLogger.L1track = dict(limit = -1)
 process.MessageLogger.Tracklet = dict(limit = -1)
 process.MessageLogger.TrackTriggerHPH = dict(limit = -1)
 
-if GEOMETRY == "D88" or GEOMETRY == 'D98':
+if GEOMETRY == "D88" or GEOMETRY == 'D110':
     print("using geometry " + GEOMETRY + " (tilted)")
     process.load('Configuration.Geometry.GeometryExtendedRun4' + GEOMETRY + 'Reco_cff')
     process.load('Configuration.Geometry.GeometryExtendedRun4' + GEOMETRY +'_cff')
@@ -53,14 +53,14 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 from Configuration.AlCa.GlobalTag import GlobalTag
 # Change needed to run with D98 geometry in recent CMSSW versions.
 #process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
-process.GlobalTag = GlobalTag(process.GlobalTag, '133X_mcRun4_realistic_v1', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, '141X_mcRun4_realistic_v2', '')
 
 
 ############################################################
 # input and output
 ############################################################
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10000))
 
 #--- To use MCsamples scripts, defining functions get*data*() for easy MC access,
 #--- follow instructions in https://github.com/cms-L1TK/MCsamples
@@ -68,7 +68,7 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
 #from MCsamples.Scripts.getCMSdata_cfi import *
 #from MCsamples.Scripts.getCMSlocaldata_cfi import *
 
-if GEOMETRY == "D98":
+if GEOMETRY == "D110":
 
   # Read data from card files (defines getCMSdataFromCards()):
   #from MCsamples.RelVal_1400_D98.PU200_TTbar_14TeV_cfi import *
@@ -82,7 +82,7 @@ if GEOMETRY == "D98":
   #dataName="/RelValTTbar_14TeV/CMSSW_14_0_0_pre2-PU_133X_mcRun4_realistic_v1_STD_2026D98_PU200_RV229-v1/GEN-SIM-DIGI-RAW"
   #inputMC=getCMSdata(dataName)
 
-  inputMC = ["/store/relval/CMSSW_14_0_0_pre2/RelValTTbar_14TeV/GEN-SIM-DIGI-RAW/PU_133X_mcRun4_realistic_v1_STD_2026D98_PU200_RV229-v1/2580000/0b2b0b0b-f312-48a8-9d46-ccbadc69bbfd.root"]
+  inputMC = ["/store/mc/Phase2Spring24DIGIRECOMiniAOD/DisplacedSUSY_stopToBottom_M-800_50mm_TuneCP5_14TeV-pythia8/GEN-SIM-DIGI-RAW-MINIAOD/PU200_AllTP_140X_mcRun4_realistic_v4-v1/2810000/422e9ac0-0bfb-4bc2-9cea-8022bcc593e0.root"]
 
 elif GEOMETRY == "D88":
 
@@ -108,7 +108,7 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(*inp
 # Use skipEvents to select particular single events for test vectors
 #process.source.skipEvents = cms.untracked.uint32(11)
 
-process.TFileService = cms.Service("TFileService", fileName = cms.string('L1TrkNtuple.root'), closeFileFast = cms.untracked.bool(True))
+process.TFileService = cms.Service("TFileService", fileName = cms.string('L1TrkNtuple_SUSY_noDR_HYBRID_DISPLACED_1000Events.root'), closeFileFast = cms.untracked.bool(True))
 process.Timing = cms.Service("Timing", summaryOnly = cms.untracked.bool(True))
 
 
