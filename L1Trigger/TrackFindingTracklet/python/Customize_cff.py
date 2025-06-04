@@ -72,3 +72,18 @@ def oldKFConfig(process):
   process.ProducerKF.TrackFitSettings.KalmanHOalpha           = 0
   process.ProducerKF.TrackFitSettings.KalmanHOhelixExp        = True
   process.ProducerKF.TrackFitSettings.KalmanDebugLevel        = 0
+
+
+def newKFConfig(process):
+    """
+    Configure HYBRID_NEWKF_DISPLACED:
+      - Enable full 5-parameter fit
+    """
+    process.TrackFindingTrackletProducer_params.Use5ParameterFit = cms.bool(True)
+    #Copied from fwConfig (tgis is what HYBRID_NEWKF uses)
+    process.l1tTTTracksFromTrackletEmulation.Fakefit = True
+    process.TrackTriggerSetup.TrackFinding.MaxEta =  2.5
+    process.TrackTriggerSetup.GeometricProcessor.ChosenRofZ = 57.76
+    process.l1tTTTracksFromTrackletEmulation.RemovalType = ""
+    process.l1tTTTracksFromTrackletEmulation.DoMultipleMatches = False
+    process.l1tTTTracksFromTrackletEmulation.StoreTrackBuilderOutput = True
