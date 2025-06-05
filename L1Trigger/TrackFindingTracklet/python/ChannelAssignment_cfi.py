@@ -47,8 +47,8 @@ ChannelAssignment_params = cms.PSet (
     L2D1 = cms.vint32(  1, 12, 13, 14 ),
     L3L4L2 = cms.vint32(  1,  5, 6, 11, 12, 13),
     L5L6L4 = cms.vint32(   1, 2, 3) ,
-    L2L3D1 = cms.vint32(  1,  4,  12, 13, 14),
-    D1D2L2 = cms.vint32(  1,  3,  13,  14,  15 )
+    L2L3D1 = cms.vint32(  1,  12, 13, 14),
+    D1D2L2 = cms.vint32(  1,  13,  14 )
   ),
 
   IRChannelsIn = cms.vint32( range(0, 48) ) # vector of DTC id indexed by connected IR module id (from order in processingmodules.dat)

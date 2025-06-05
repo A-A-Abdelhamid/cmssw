@@ -77,39 +77,41 @@ def oldKFConfig(process):
 def newKFConfig(process):
     """
     Configure HYBRID_NEWKF_DISPLACED:
-      - Use extended seeding
+      - Use extended (triplet) seeding
       - Enable full 5-parameter Kalman fit
       - Use seed wiring map for triplet layers
-      - Load lookup tables for extended KF (TED/TRE)
-      - Emulate firmware-like configuration
+      - Load TED/TRE lookup tables for displaced tracking
+      - Emulate firmware-like behavior
     """
 
-    # Tell the tracklet producer to use extended (triplet) seeding
-    process.TrackFindingTrackletProducer_params.Extended = cms.bool(True)
+    # Use extended (triplet) seeding
+    process.l1tTTTracksFromTrackletEmulation.Extended = cms.bool(True)
 
-    # Use 5-parameter Kalman Filter fit
-    process.TrackFindingTrackletProducer_params.Use5ParameterFit = cms.bool(True)
+    # Enable 5-parameter Kalman Filter fit
+    process.l1tTTTracksFromTrackletEmulation.Use5ParameterFit = cms.bool(True)
 
-    # Provide the wiring map to enable triplet seeding
-    process.TrackFindingTrackletProducer_params.Reduced = cms.bool(False)
-    process.TrackFindingTrackletProducer_params.wiresJSONFile = cms.string(
+    # Use triplet seeding (disable reduced wiring)
+    process.l1tTTTracksFromTrackletEmulation.Reduced = cms.bool(False)
+
+    # Provide the wiring map used for triplet seed layers
+    process.l1tTTTracksFromTrackletEmulation.wiresJSONFile = cms.string(
         "L1Trigger/TrackFindingTracklet/data/seedWiring.json"
     )
 
-    # Load TED/TRE tables used in displaced KF
-    process.TrackFindingTrackletProducer_params.tableTEDFile = cms.FileInPath(
+    # Load TED/TRE tables used in extended displaced KF
+    process.l1tTTTracksFromTrackletEmulation.tableTEDFile = cms.FileInPath(
         "L1Trigger/TrackFindingTracklet/data/table_TED/table_TED_D1PHIA1_D2PHIA1.txt"
     )
-    process.TrackFindingTrackletProducer_params.tableTREFile = cms.FileInPath(
+    process.l1tTTTracksFromTrackletEmulation.tableTREFile = cms.FileInPath(
         "L1Trigger/TrackFindingTracklet/data/table_TRE/table_TRE_D1AD2A_1.txt"
     )
 
-    # These settings emulate hardware/firmware behavior
-    process.TrackFindingTrackletProducer_params.Fakefit = cms.bool(True)
-    process.TrackFindingTrackletProducer_params.RemovalType = cms.string("")
-    process.TrackFindingTrackletProducer_params.DoMultipleMatches = cms.bool(False)
-    process.TrackFindingTrackletProducer_params.StoreTrackBuilderOutput = cms.bool(True)
+    # Firmware-like behavior
+    process.l1tTTTracksFromTrackletEmulation.Fakefit = cms.bool(True)
+    process.l1tTTTracksFromTrackletEmulation.RemovalType = cms.string("")
+    process.l1tTTTracksFromTrackletEmulation.DoMultipleMatches = cms.bool(False)
+    process.l1tTTTracksFromTrackletEmulation.StoreTrackBuilderOutput = cms.bool(True)
 
-    # Max eta and chosen z-coordinate for beamspot used in geometrical calculations
+    # Geometry settings
     process.TrackTriggerSetup.TrackFinding.MaxEta = cms.double(2.5)
     process.TrackTriggerSetup.GeometricProcessor.ChosenRofZ = cms.double(57.76)
