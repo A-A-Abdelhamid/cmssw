@@ -77,13 +77,39 @@ def oldKFConfig(process):
 def newKFConfig(process):
     """
     Configure HYBRID_NEWKF_DISPLACED:
-      - Enable full 5-parameter fit
+      - Use extended seeding
+      - Enable full 5-parameter Kalman fit
+      - Use seed wiring map for triplet layers
+      - Load lookup tables for extended KF (TED/TRE)
+      - Emulate firmware-like configuration
     """
+
+    # Tell the tracklet producer to use extended (triplet) seeding
+    process.TrackFindingTrackletProducer_params.Extended = cms.bool(True)
+
+    # Use 5-parameter Kalman Filter fit
     process.TrackFindingTrackletProducer_params.Use5ParameterFit = cms.bool(True)
-    #Copied from fwConfig (tgis is what HYBRID_NEWKF uses)
-    process.l1tTTTracksFromTrackletEmulation.Fakefit = True
-    process.TrackTriggerSetup.TrackFinding.MaxEta =  2.5
-    process.TrackTriggerSetup.GeometricProcessor.ChosenRofZ = 57.76
-    process.l1tTTTracksFromTrackletEmulation.RemovalType = ""
-    process.l1tTTTracksFromTrackletEmulation.DoMultipleMatches = False
-    process.l1tTTTracksFromTrackletEmulation.StoreTrackBuilderOutput = True
+
+    # Provide the wiring map to enable triplet seeding
+    process.TrackFindingTrackletProducer_params.Reduced = cms.bool(False)
+    process.TrackFindingTrackletProducer_params.wiresJSONFile = cms.string(
+        "L1Trigger/TrackFindingTracklet/data/seedWiring.json"
+    )
+
+    # Load TED/TRE tables used in displaced KF
+    process.TrackFindingTrackletProducer_params.tableTEDFile = cms.FileInPath(
+        "L1Trigger/TrackFindingTracklet/data/table_TED/table_TED_D1PHIA1_D2PHIA1.txt"
+    )
+    process.TrackFindingTrackletProducer_params.tableTREFile = cms.FileInPath(
+        "L1Trigger/TrackFindingTracklet/data/table_TRE/table_TRE_D1AD2A_1.txt"
+    )
+
+    # These settings emulate hardware/firmware behavior
+    process.TrackFindingTrackletProducer_params.Fakefit = cms.bool(True)
+    process.TrackFindingTrackletProducer_params.RemovalType = cms.string("")
+    process.TrackFindingTrackletProducer_params.DoMultipleMatches = cms.bool(False)
+    process.TrackFindingTrackletProducer_params.StoreTrackBuilderOutput = cms.bool(True)
+
+    # Max eta and chosen z-coordinate for beamspot used in geometrical calculations
+    process.TrackTriggerSetup.TrackFinding.MaxEta = cms.double(2.5)
+    process.TrackTriggerSetup.GeometricProcessor.ChosenRofZ = cms.double(57.76)

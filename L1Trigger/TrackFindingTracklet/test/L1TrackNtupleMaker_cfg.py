@@ -23,7 +23,7 @@ GEOMETRY = "D98"
 # 'HYBRID_NEWKF' (baseline, 4par fit, with bit-accurate KF emulation),
 # 'HYBRID_REDUCED' to use the "L5L6" seeding only reduced configuration.
 # (Or legacy algos 'TMTT' or 'TRACKLET').
-L1TRKALGO = 'HYBRID_NEWKF'
+L1TRKALGO = 'HYBRID_NEWKF_DISPLACED'
 
 WRITE_DATA = False
 
@@ -60,7 +60,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '133X_mcRun4_realistic_v1', '')
 # input and output
 ############################################################
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1000))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(10))
 
 #--- To use MCsamples scripts, defining functions get*data*() for easy MC access,
 #--- follow instructions in https://github.com/cms-L1TK/MCsamples
@@ -116,7 +116,7 @@ process.source = cms.Source("PoolSource", fileNames = cms.untracked.vstring(*inp
 # Use skipEvents to select particular single events for test vectors
 #process.source.skipEvents = cms.untracked.uint32(11)
 
-process.TFileService = cms.Service("TFileService", fileName = cms.string('L1TrkNtuple_HYBRID_NEWKF_TTbar_1000Events.root'), closeFileFast = cms.untracked.bool(True))
+process.TFileService = cms.Service("TFileService", fileName = cms.string('test.root'), closeFileFast = cms.untracked.bool(True))
 process.Timing = cms.Service("Timing", summaryOnly = cms.untracked.bool(True))
 
 
@@ -179,6 +179,7 @@ elif (L1TRKALGO == 'HYBRID_DISPLACED'):
 elif (L1TRKALGO == 'HYBRID_NEWKF' or L1TRKALGO == 'HYBRID_REDUCED' or L1TRKALGO == 'HYBRID_NEWKF_DISPLACED'):
     from L1Trigger.TrackFindingTracklet.Customize_cff import *
     if (L1TRKALGO == 'HYBRID_NEWKF_DISPLACED'):
+      #ßfwConfig( process )
       newKFConfig(process)
       NHELIXPAR = 5
    
