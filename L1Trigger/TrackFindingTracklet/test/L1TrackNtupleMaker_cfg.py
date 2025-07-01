@@ -23,7 +23,7 @@ GEOMETRY = "D98"
 # 'HYBRID_NEWKF' (baseline, 4par fit, with bit-accurate KF emulation),
 # 'HYBRID_REDUCED' to use the "L5L6" seeding only reduced configuration.
 # (Or legacy algos 'TMTT' or 'TRACKLET').
-L1TRKALGO = 'HYBRID'
+L1TRKALGO = 'HYBRID_NEWKF_DISPLACED'
 
 WRITE_DATA = False
 
@@ -60,7 +60,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, '133X_mcRun4_realistic_v1', '')
 # input and output
 ############################################################
 
-process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(100))
+process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(1))
 
 #--- To use MCsamples scripts, defining functions get*data*() for easy MC access,
 #--- follow instructions in https://github.com/cms-L1TK/MCsamples
@@ -190,8 +190,8 @@ elif (L1TRKALGO == 'HYBRID_NEWKF' or L1TRKALGO == 'HYBRID_REDUCED'):
     # Needed by L1TrackNtupleMaker
     process.HitPatternHelperSetup.useNewKF = True
 
-# HYBRID_NEWKF_DIPSLACED
-elif (L1TRKALGO == 'HYBRID_NEWKF_DIPSLACED'):
+# HYBRID_NEWKF_DISPLACED
+elif (L1TRKALGO == 'HYBRID_NEWKF_DISPLACED'):
     process.load( 'L1Trigger.TrackFindingTracklet.Producer_cff' )
     process.load( 'L1Trigger.TrackFindingTracklet.Analyzer_cff' )
     process.ProducerTM.InputLabelTM = cms.string("l1tTTTracksFromExtendedTrackletEmulation")

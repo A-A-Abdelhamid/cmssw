@@ -75,10 +75,10 @@ def oldKFConfig(process):
 
 
 def fwConfigDisp(process):
-process.ProducerKF.use5parfit = cms.bool(True)
-process.l1tTTTracksFromExtendedTrackletEmulation.FakeFit = True
-process.TrackTriggerSetup.TrackFinding.MaxEta =  2.5
-process.TrackTriggerSetup.GeometricProcessor.ChosenRofZ = 57.76
-process.l1tTTTracksFromExtendedTrackletEmulation.RemovalType = ""
-process.l1tTTTracksFromExtendedTrackletEmulation.DoMultipleMatches = False
-process.l1tTTTracksFromExtendedTrackletEmulation.StoreTrackBuilderOutput = True
+  process.ProducerKF.use5parfit = cms.bool(True)
+  process.l1tTTTracksFromExtendedTrackletEmulation.FakeFit = cms.bool(True)
+  process.TrackTriggerSetup.TrackFinding.MaxEta =  2.5
+  process.TrackTriggerSetup.GeometricProcessor.ChosenRofZ = 57.76
+  process.l1tTTTracksFromExtendedTrackletEmulation.RemovalType = ""
+  process.l1tTTTracksFromExtendedTrackletEmulation.DoMultipleMatches = False
+  process.l1tTTTracksFromExtendedTrackletEmulation.StoreTrackBuilderOutput = True
