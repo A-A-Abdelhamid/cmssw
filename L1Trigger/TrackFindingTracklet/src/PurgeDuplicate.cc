@@ -156,20 +156,20 @@ void PurgeDuplicate::execute(std::vector<Track>& outputtracks, unsigned int iSec
               inputstubidslists_.push_back(stubidslist);
               mergedstubidslists_.push_back(stubidslist);
 
-              // Encoding: L1L2=0, L2L3=1, L3L4=2, L5L6=3, D1D2=4, D3D4=5, L1D1=6, L2D1=7
+              // Encoding: L1L2=0, L2L3=1, L3L4=2, L5L6=3, D1D2=4, D3D4=5, L1D1=6, L2D1=7, L2L3L4=8, L4L5L6=9, L2L3D1=10, L2D1D2=11
               // Best Guess:          L1L2 > L1D1 > L2L3 > L2D1 > D1D2 > L3L4 > L5L6 > D3D4
               // Best Rank:           L1L2 > L3L4 > D3D4 > D1D2 > L2L3 > L2D1 > L5L6 > L1D1
               // Rank-Informed Guess: L1L2 > L3L4 > L1D1 > L2L3 > L2D1 > D1D2 > L5L6 > D3D4
               const unsigned int curSeed = aTrack->seedIndex();
-              static const std::vector<int> ranks{1, 5, 2, 7, 4, 3, 8, 6};
+              static const std::vector<int> ranks{1, 5, 2, 7, 4, 3, 8, 6, 9, 10, 12, 11}; // L2L3L4 >  L4L5L6 > L2D1D2 > L2L3D1 
               if (curSeed < ranks.size()) {
                 seedRank.push_back(ranks[curSeed]);
-              } else if (settings_.extended()) {
-                seedRank.push_back(9);
-              } else {
-                throw cms::Exception("LogError") << __FILE__ << " " << __LINE__ << " Seed type " << curSeed
-                                                 << " not found in list, and settings->extended() not set.";
-              }
+              } // else if (settings_.extended()) {
+                // seedRank.push_back(9);
+              // } else {
+              //  throw cms::Exception("LogError") << __FILE__ << " " << __LINE__ << " Seed type " << curSeed
+              //                                   << " not found in list, and settings->extended() not set.";
+              // }
 
               if (stublist.size() != stubidslist.size())
                 throw cms::Exception("LogicError")
@@ -294,15 +294,15 @@ void PurgeDuplicate::execute(std::vector<Track>& outputtracks, unsigned int iSec
               dupMap[seedRankIdx[itrk]][seedRankIdx[jtrk]] = true;
               dupMap[seedRankIdx[jtrk]][seedRankIdx[itrk]] = true;
               // Until extended tracking is optimized, we will keep the comparison of the displaced seeds the same which uses < and not <=
-              if ((seedRank[seedRankIdx[itrk]] == 9) && (seedRank[seedRankIdx[jtrk]] == 9)) {
-                if (seedRank[seedRankIdx[itrk]] < seedRank[seedRankIdx[jtrk]]) {
+              //if ((seedRank[seedRankIdx[itrk]] == 9) && (seedRank[seedRankIdx[jtrk]] == 9)) {
+              //  if (seedRank[seedRankIdx[itrk]] < seedRank[seedRankIdx[jtrk]]) {
+              //    mergedTrack[seedRankIdx[jtrk]] = true;
+              //  }
+              //} else {
+              if (seedRank[seedRankIdx[itrk]] <= seedRank[seedRankIdx[jtrk]]) {
                   mergedTrack[seedRankIdx[jtrk]] = true;
-                }
-              } else {
-                if (seedRank[seedRankIdx[itrk]] <= seedRank[seedRankIdx[jtrk]]) {
-                  mergedTrack[seedRankIdx[jtrk]] = true;
-                }
-              }
+             }
+              //}
             }
           }
         }
@@ -313,18 +313,18 @@ void PurgeDuplicate::execute(std::vector<Track>& outputtracks, unsigned int iSec
               // Set preferred track based on seed rank
               int preftrk;
               int rejetrk;
-              if ((seedRank[seedRankIdx[itrk]] == 9) && (seedRank[seedRankIdx[jtrk]] == 9)) {
-                preftrk = jtrk;
-                rejetrk = itrk;
-              } else {
-                if (seedRank[seedRankIdx[itrk]] <= seedRank[seedRankIdx[jtrk]]) {
+             //if ((seedRank[seedRankIdx[itrk]] == 9) && (seedRank[seedRankIdx[jtrk]] == 9)) {
+             //   preftrk = jtrk;
+             //   rejetrk = itrk;
+             // } else {
+             if (seedRank[seedRankIdx[itrk]] <= seedRank[seedRankIdx[jtrk]]) {
                   preftrk = itrk;
                   rejetrk = jtrk;
                 } else {
                   preftrk = jtrk;
                   rejetrk = itrk;
                 }
-              }
+              //}
 
               // If the preffered track is in more than one bin, but not in the proper rinv or phi bin, then mark as true
               if (((findOverlapRinvBins(sortedinputtracklets[preftrk]).size() > 1) &&
@@ -661,13 +661,13 @@ std::vector<double> PurgeDuplicate::getInventedCoords(unsigned int iSector,
     stub_r = settings_.rmean(stubLayer - 1);
     stub_phi = tracklet->phi0() - std::asin(stub_r * tracklet_rinv / 2);
     stub_phi = stub_phi + iSector * settings_.dphisector() - 0.5 * settings_.dphisectorHG();
-    stub_phi = reco::reducePhiRange(stub_phi);
+    stub_phi = reco::reduceRange(stub_phi);
     stub_z = tracklet->z0() + 2 * tracklet->t() * 1 / tracklet_rinv * std::asin(stub_r * tracklet_rinv / 2);
   } else {
     stub_z = settings_.zmean(stubDisk - 1) * tracklet->disk() / abs(tracklet->disk());
     stub_phi = tracklet->phi0() - (stub_z - tracklet->z0()) * tracklet_rinv / 2 / tracklet->t();
     stub_phi = stub_phi + iSector * settings_.dphisector() - 0.5 * settings_.dphisectorHG();
-    stub_phi = reco::reducePhiRange(stub_phi);
+    stub_phi = reco::reduceRange(stub_phi);
     stub_r = 2 / tracklet_rinv * std::sin((stub_z - tracklet->z0()) * tracklet_rinv / 2 / tracklet->t());
   }
 
@@ -710,7 +710,7 @@ std::vector<double> PurgeDuplicate::getInventedCoordsExtended(unsigned int iSect
       sin_val = std::max(std::min(sin_val, 1.0), -1.0);
       stub_phi = tracklet->phi0() - std::asin(sin_val);
       stub_phi = stub_phi + iSector * settings_.dphisector() - 0.5 * settings_.dphisectorHG();
-      stub_phi = reco::reducePhiRange(stub_phi);
+      stub_phi = reco::reduceRange(stub_phi);
 
       // The expanded version of this expression is more stable for extremely
       // high-pT (high-rho) tracks. But we also explicitly restrict cos_val to
@@ -735,7 +735,7 @@ std::vector<double> PurgeDuplicate::getInventedCoordsExtended(unsigned int iSect
       sin_val = std::max(std::min(sin_val, 1.0), -1.0);
       stub_phi = tracklet->phi0() - std::asin(sin_val);
       stub_phi = stub_phi + iSector * settings_.dphisector() - 0.5 * settings_.dphisectorHG();
-      stub_phi = reco::reducePhiRange(stub_phi);
+      stub_phi = reco::reduceRange(stub_phi);
     }
   }
 
